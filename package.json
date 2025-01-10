@@ -16,9 +16,11 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"tldraw": "3.7.0",
+		"@types/jest": "^29.5.14",
+		"@types/node": "^22.10.5",
 		"react": "^18.2.0",
-		"react-dom": "^18.2.0"
+		"react-dom": "^18.2.0",
+		"tldraw": "3.7.0"
 	},
 	"devDependencies": {
 		"@types/react": "^18.2.0",
@@ -31,5 +33,6 @@
 		"eslint-plugin-react-refresh": "^0.4.13",
 		"typescript": "^5.0.2",
 		"vite": "^5.4.10"
-	}
+	},
+	"packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
 }
