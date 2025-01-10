@@ -3,7 +3,7 @@ import { exhaustiveSwitchError } from '../shared/utils'
 import {
 	createTldrawAiTransform,
 	TLAiChange,
-	TLAiInput,
+	TLAiPrompt,
 	TLAiTransform,
 } from '../shared/ai-shared'
 
@@ -68,7 +68,7 @@ export const simpleIdTransforms = createTldrawAiTransform(() => {
 	}
 
 	return {
-		transformInput: (input: TLAiInput) => {
+		transformInput: (input: TLAiPrompt) => {
 			// Collect all ids, write simple ids, and write the simple ids
 			for (const shape of input.content.shapes) {
 				collectAllIdsRecursively(shape, memo, mapObjectWithIdAndWriteSimple)

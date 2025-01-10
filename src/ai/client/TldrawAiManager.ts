@@ -13,7 +13,7 @@ import { exhaustiveSwitchError, mapObjectMapValues } from '../shared/utils'
 import {
 	TLAiChange,
 	TLAiGenerateOptions,
-	TLAiInput,
+	TLAiPrompt,
 	TLAiTransform,
 } from '../shared/ai-shared'
 
@@ -49,7 +49,7 @@ export class TldrawAiManager {
 		) as Record<TLBinding['type'], TLBinding['props']>
 	}
 
-	async generate(prompt: TLAiInput['prompt'], options?: TLAiGenerateOptions) {
+	async generate(prompt: TLAiPrompt['prompt'], options?: TLAiGenerateOptions) {
 		const { editor } = this
 
 		// Create the input based on the prompt, options, and the current editor state
@@ -100,9 +100,9 @@ export class TldrawAiManager {
 	 * @param options Options to generate the input
 	 */
 	private async makeInput(
-		prompt: TLAiInput['prompt'],
+		prompt: TLAiPrompt['prompt'],
 		options = {} as TLAiGenerateOptions
-	): Promise<TLAiInput> {
+	): Promise<TLAiPrompt> {
 		const { editor, shapes, bindings } = this
 		const {
 			contextBounds = editor.getViewportPageBounds(),

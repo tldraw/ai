@@ -1,8 +1,12 @@
 import { createShapeId } from 'tldraw'
 import { sleep } from './ai/shared/utils'
 import { createTldrawAiResponder } from './ai/server/ai-server'
+import { promptModel } from './models/google'
 
 export const fakeAiServer = createTldrawAiResponder(async function* (input) {
+	const res = await promptModel(input)
+	console.log(res)
+
 	let text = ''
 	if (typeof input.prompt === 'string') {
 		text = input.prompt

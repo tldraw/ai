@@ -20,7 +20,7 @@ type TLAiMessage =
 // Include responses? Or just the description / intent of the response?
 
 export type TLAiTransform = () => {
-	transformInput?(input: TLAiInput): TLAiInput
+	transformInput?(prompt: TLAiPrompt): TLAiPrompt
 	transformChange?(change: TLAiChange): TLAiChange
 }
 
@@ -29,7 +29,7 @@ export function createTldrawAiTransform(transform: TLAiTransform) {
 }
 
 /** @internal */
-export interface TLAiInput {
+export interface TLAiPrompt {
 	// The user's written prompt
 	prompt: string | TLAiMessage[]
 	// A screenshot

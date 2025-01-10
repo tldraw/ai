@@ -16,6 +16,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@google/generative-ai": "^0.21.0",
 		"@types/jest": "^29.5.14",
 		"@types/node": "^22.10.5",
 		"react": "^18.2.0",
