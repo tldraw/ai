@@ -40,13 +40,19 @@ export class TldrawAiManager {
 		// These won't change, so let's define them here and store them
 		this.shapes = mapObjectMapValues(
 			this.editor.shapeUtils,
-			(_, util) => (util!.constructor as TLAnyShapeUtilConstructor).props
+			(_, util) => util?.getDefaultProps()
+			// (_, util) => (util!.constructor as TLAnyShapeUtilConstructor).props
 		) as Record<TLShape['type'], TLShape['props']>
 
 		this.bindings = mapObjectMapValues(
 			this.editor.bindingUtils,
-			(_, util) => (util!.constructor as TLAnyBindingUtilConstructor).props
+			(_, util) => util?.getDefaultProps()
+			// (_, util) => (util!.constructor as TLAnyBindingUtilConstructor).props
 		) as Record<TLBinding['type'], TLBinding['props']>
+	}
+
+	dispose() {
+		// this.dispose()
 	}
 
 	async generate(prompt: TLAiPrompt['prompt'], options?: TLAiGenerateOptions) {
@@ -60,33 +66,35 @@ export class TldrawAiManager {
 
 		// If we have a fn to transform the input, do that now
 		if (transformInput) {
-			input = transformInput(input)
+			input = transformInput(editor, input)
 		}
 
 		function handleChange(change: TLAiChange) {
-			console.log('handling change')
 			if (editor.isDisposed) return
 
 			// If we have a fn to transform the change, do that now
 			if (transformChange) {
-				change = transformChange(change)
+				change = transformChange(editor, change)
 			}
 
 			// Todo: make this extendable
-			switch (change.type) {
-				case 'createShape':
-					editor.createShape(change.shape)
-					break
-				case 'updateShape':
-					editor.updateShape(change.shape)
-					break
-				case 'deleteShape': {
-					console.log(change)
-					editor.deleteShape(change.shapeId)
-					break
+			try {
+				switch (change.type) {
+					case 'createShape':
+						editor.createShape(change.shape)
+						break
+					case 'updateShape':
+						editor.updateShape(change.shape)
+						break
+					case 'deleteShape': {
+						editor.deleteShape(change.shapeId)
+						break
+					}
+					default:
+						exhaustiveSwitchError(change)
 				}
-				default:
-					exhaustiveSwitchError(change)
+			} catch (e) {
+				console.error('Error handling change:', e)
 			}
 		}
 

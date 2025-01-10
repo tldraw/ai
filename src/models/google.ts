@@ -9,6 +9,7 @@ import {
 	SchemaType,
 } from '@google/generative-ai'
 import { TLAiPrompt } from '../ai/shared/ai-shared'
+import { TLShapePartial } from 'tldraw'
 
 /**
  * Get a base64 string from a URL. Fetch the URL and return the mimetype and data as base64.
@@ -32,23 +33,118 @@ export interface GoogleModel {
 	): Promise<GenerateContentResult>
 }
 
+type SchemaExample = {
+	summary: string
+	changes: (
+		| {
+				type: 'create'
+				shape: TLShapePartial
+		  }
+		| {
+				type: 'update'
+				shape: TLShapePartial
+		  }
+		| {
+				type: 'delete'
+				id: string
+		  }
+	)[]
+}
+
 const commandsSchema: ResponseSchema = {
 	type: SchemaType.OBJECT,
 	properties: {
 		summary: {
 			type: SchemaType.STRING,
 			description:
-				'A detailed description of every the provided inputs, in order.',
+				'A detailed description of what you have done on the canvas.',
+		},
+		// should be an array of TLAiChange
+		changes: {
+			type: SchemaType.ARRAY,
+			items: {
+				type: SchemaType.OBJECT,
+				properties: {
+					type: {
+						type: SchemaType.STRING,
+						description: 'The type of change to make.',
+						enum: ['createShape', 'updateShape', 'deleteShape'],
+					},
+					shape: {
+						type: SchemaType.OBJECT,
+						description: 'The shape to create.',
+						properties: {
+							id: {
+								type: SchemaType.STRING,
+								description: 'The id of the shape.',
+							},
+							type: {
+								type: SchemaType.STRING,
+								description: 'The type of the shape.',
+								enum: ['geo'],
+							},
+							description: {
+								type: SchemaType.STRING,
+								description:
+									'The description of the shape, its role or function in the drawing; an answer to the question, "what is this shape for?".',
+							},
+							x: {
+								type: SchemaType.NUMBER,
+								description: 'The x position of the shape.',
+							},
+							y: {
+								type: SchemaType.NUMBER,
+								description: 'The y position of the shape.',
+							},
+							props: {
+								type: SchemaType.OBJECT,
+								properties: {
+									w: {
+										type: SchemaType.NUMBER,
+										description: 'The width of the shape.',
+									},
+									h: {
+										type: SchemaType.NUMBER,
+										description: 'The height of the shape.',
+									},
+									color: {
+										type: SchemaType.STRING,
+										description: 'The color of the shape.',
+										enum: ['red', 'blue', 'green', 'black'],
+									},
+									fill: {
+										type: SchemaType.STRING,
+										description: 'The fill of the shape.',
+										enum: ['none', 'solid', 'fill', 'pattern'],
+									},
+									text: {
+										type: SchemaType.STRING,
+										description: 'The text to display inside of the shape.',
+									},
+								},
+								required: ['w', 'h', 'color', 'fill'],
+							},
+						},
+						required: ['id', 'description', 'type'],
+					},
+				},
+				required: ['type', 'shape'],
+			},
 		},
 	},
-	required: ['summary'],
+	required: ['summary', 'changes'],
 }
 
+const isGemeni2 = true
+
 const model = new GoogleGenerativeAI(
-	import.meta.env.VITE_GOOGLE_GENERATIVE_AI_API_KEY
+	isGemeni2
+		? import.meta.env.VITE_GOOGLE_GENERATIVE_AI_API_KEY_2
+		: import.meta.env.VITE_GOOGLE_GENERATIVE_AI_API_KEY
 ).getGenerativeModel({
-	model: 'gemini-1.5-flash-002',
-	systemInstruction: 'Do stuff',
+	model: isGemeni2 ? 'gemini-2.0-flash-exp' : 'gemini-1.5-flash-latest',
+	systemInstruction:
+		'You are an AI assistant that can create, update, and delete shapes on a canvas. Examine the provided prompt, data about the existing canvas content, and image of the canvas. Using the schema provided, product changes to be applied to the canvas in response to the user prompt. All shape ids must be formatted as "shape:1", "shape:2", etc. You must produce a response every time you are prompted. All numbers in your responses must be integers.',
 	generationConfig: {
 		responseMimeType: 'application/json',
 		responseSchema: commandsSchema,
@@ -83,6 +179,6 @@ export async function promptModel(prompt: TLAiPrompt) {
 	}
 
 	return await model
-		.generateContent(['hello', ...imageParts])
+		.generateContent([JSON.stringify(prompt), ...imageParts])
 		.then((r) => r.response.text())
 }

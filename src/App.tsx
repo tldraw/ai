@@ -1,8 +1,7 @@
-import { Tldraw } from 'tldraw'
-import { useTldrawAi } from './ai/client/react/useTldrawAi'
-import { simpleIdTransforms } from './ai/server/simpleIds'
+import { Tldraw, useEditor } from 'tldraw'
 import { useEffect } from 'react'
-import { fakeAiServer } from './fakeAiServer'
+import { useTldrawAiDemo } from './ai/client/client'
+import { sleep } from './ai/shared/utils'
 
 function App() {
 	return (
@@ -15,18 +14,33 @@ function App() {
 }
 
 function SneakyAiPlugin() {
-	const ai = useTldrawAi({
-		transform: simpleIdTransforms,
-	})
+	const editor = useEditor()
+	const prompt = useTldrawAiDemo()
 
 	useEffect(() => {
-		ai.generate('hello world').then(async ({ input, handleChange }) => {
-			for await (const change of fakeAiServer(input)) {
-				console.log('change!', change)
-				handleChange(change)
-			}
-		})
-	}, [ai])
+		;(window as any).editor = editor
+
+		let cancelled = false
+		async function promptAfterOneSecond() {
+			await sleep(2000)
+			if (cancelled) return
+			console.log('prompting')
+			await prompt(
+				'you are an autocomplete bot for my wireframe design bot. take the next three actions that you think that I am going to draw in this user interface wireframe. Incorporate visual feedback about what you see in the existing wireframe. Feel free to clean things up or reposition things if you think it will help.'
+			)
+			if (!cancelled) promptAfterOneSecond()
+		}
+
+		// for shitty autocomplete...
+		// promptAfterOneSecond()
+
+		// for shitty requests, use the console
+		;(window as any).prompt = (str: string) => prompt(str)
+
+		return () => {
+			cancelled = true
+		}
+	}, [prompt])
 
 	return null
 }

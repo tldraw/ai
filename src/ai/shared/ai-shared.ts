@@ -5,6 +5,7 @@ import {
 	TLShapeId,
 	TLContent,
 	TLBinding,
+	Editor,
 } from 'tldraw'
 
 type TLAiMessage =
@@ -20,8 +21,8 @@ type TLAiMessage =
 // Include responses? Or just the description / intent of the response?
 
 export type TLAiTransform = () => {
-	transformInput?(prompt: TLAiPrompt): TLAiPrompt
-	transformChange?(change: TLAiChange): TLAiChange
+	transformInput?(editor: Editor, prompt: TLAiPrompt): TLAiPrompt
+	transformChange?(editor: Editor, change: TLAiChange): TLAiChange
 }
 
 export function createTldrawAiTransform(transform: TLAiTransform) {
@@ -59,18 +60,21 @@ export interface TLAiGenerateOptions {
 /** @internal */
 export interface CreateShapeChange {
 	type: 'createShape'
+	description: string
 	shape: TLShapePartial
 }
 
 /** @internal */
 export interface UpdateShapeChange {
 	type: 'updateShape'
+	description: string
 	shape: TLShapePartial
 }
 
 /** @internal */
 export interface DeleteShapeChange {
 	type: 'deleteShape'
+	description: string
 	shapeId: TLShapeId
 }
 
