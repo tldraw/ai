@@ -1,7 +1,7 @@
 import { Tldraw, useEditor } from 'tldraw'
 import { useEffect } from 'react'
-import { useTldrawAiDemo } from './ai/client/client'
 import { sleep } from './ai/shared/utils'
+import { useTldrawAiDemo } from './ai/demo/useTldrawAiDemo'
 
 function App() {
 	return (

@@ -8,6 +8,16 @@ import {
 	Editor,
 } from 'tldraw'
 
+export abstract class TLAiTransform {
+	constructor(public editor: Editor) {}
+	transformPrompt?(prompt: TLAiPrompt): TLAiPrompt
+	transformChange?(change: TLAiChange): TLAiChange
+}
+
+export interface TLAiTransformConstructor {
+	new (editor: Editor): TLAiTransform
+}
+
 type TLAiMessage =
 	| {
 			type: 'text'
@@ -18,28 +28,13 @@ type TLAiMessage =
 			mimeType: string
 			src: string
 	  }
-// Include responses? Or just the description / intent of the response?
 
-export abstract class TLAiTransform {
-	constructor(public editor: Editor) {}
-	transformInput?(prompt: TLAiPrompt): TLAiPrompt
-	transformChange?(change: TLAiChange): TLAiChange
-}
-
-export interface TLAiTransformConstructor {
-	new (editor: Editor): TLAiTransform
-}
-
-export function createTldrawAiTransform<const T extends TLAiTransform>(
-	transform: T
-) {
-	return transform
-}
-
-/** @internal */
+/**
+ * A prompt with information from the editor.
+ */
 export interface TLAiPrompt {
 	// The user's written prompt
-	prompt: string | TLAiMessage[]
+	message: string | TLAiMessage[]
 	// A screenshot
 	image?: string
 	// A mapping of shape type to shape props
@@ -54,38 +49,27 @@ export interface TLAiPrompt {
 	promptBounds: Box
 }
 
-/** @internal */
-export interface TLAiGenerateOptions {
-	// Specific canvas content
-	content?: TLContent
-	// The bounds of the context in the editor
-	contextBounds?: Box
-	// The bounds of the prompt in the editor
-	promptBounds?: Box
-}
-
-/** @internal */
 export interface CreateShapeChange {
 	type: 'createShape'
 	description: string
 	shape: TLShapePartial
 }
 
-/** @internal */
 export interface UpdateShapeChange {
 	type: 'updateShape'
 	description: string
 	shape: TLShapePartial
 }
 
-/** @internal */
 export interface DeleteShapeChange {
 	type: 'deleteShape'
 	description: string
 	shapeId: TLShapeId
 }
 
-/** @internal */
+/**
+ * A generated change that can be applied to the editor.
+ */
 export type TLAiChange =
 	| CreateShapeChange
 	| UpdateShapeChange

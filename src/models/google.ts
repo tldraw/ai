@@ -59,6 +59,11 @@ const commandsSchema: ResponseSchema = {
 			description:
 				'A detailed description of what you have done on the canvas.',
 		},
+		description: {
+			type: SchemaType.STRING,
+			description:
+				'The description of the shape, its role or function in the drawing; an answer to the question, "what is this shape for?".',
+		},
 		// should be an array of TLAiChange
 		changes: {
 			type: SchemaType.ARRAY,
@@ -82,11 +87,6 @@ const commandsSchema: ResponseSchema = {
 								type: SchemaType.STRING,
 								description: 'The type of the shape.',
 								enum: ['geo'],
-							},
-							description: {
-								type: SchemaType.STRING,
-								description:
-									'The description of the shape, its role or function in the drawing; an answer to the question, "what is this shape for?".',
 							},
 							x: {
 								type: SchemaType.NUMBER,
