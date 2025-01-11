@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useEditor } from 'tldraw'
 import { TldrawAiManager } from '../TldrawAiManager'
-import { SimpleIds } from './SimpleIds'
 import { fakeAiServer } from '../../server/aiDemoServer'
 import { TLAiPrompt } from '../../shared/ai-shared'
+import { SimpleIds } from './SimpleIds'
 
 export function useTldrawAiDemo() {
 	const editor = useEditor()
