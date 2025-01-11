@@ -3,8 +3,6 @@ import {
 	Editor,
 	FileHelpers,
 	getSvgAsImage,
-	TLAnyBindingUtilConstructor,
-	TLAnyShapeUtilConstructor,
 	TLBinding,
 	TLContent,
 	TLShape,
@@ -30,13 +28,10 @@ export class TldrawAiManager {
 	// A mapping of binding type to binding props
 	bindings: Record<TLBinding['type'], TLBinding['props']>
 
-	transform: TLAiTransform
-
 	constructor(
 		public readonly editor: Editor,
 		public readonly options?: TldrawAiManagerOptions
 	) {
-		this.transform = options?.transform ?? (() => ({}))
 		// These won't change, so let's define them here and store them
 		this.shapes = mapObjectMapValues(
 			this.editor.shapeUtils,
@@ -51,54 +46,31 @@ export class TldrawAiManager {
 		) as Record<TLBinding['type'], TLBinding['props']>
 	}
 
-	dispose() {
-		// this.dispose()
-	}
+	dispose() {}
 
-	async generate(prompt: TLAiPrompt['prompt'], options?: TLAiGenerateOptions) {
+	applyChange(change: TLAiChange) {
 		const { editor } = this
 
-		// Create the input based on the prompt, options, and the current editor state
-		let input = await this.makeInput(prompt, options)
+		if (editor.isDisposed) return
 
-		// Will be shared again with the transformOutput object
-		const { transformInput, transformChange } = this.transform()
-
-		// If we have a fn to transform the input, do that now
-		if (transformInput) {
-			input = transformInput(editor, input)
-		}
-
-		function handleChange(change: TLAiChange) {
-			if (editor.isDisposed) return
-
-			// If we have a fn to transform the change, do that now
-			if (transformChange) {
-				change = transformChange(editor, change)
-			}
-
-			// Todo: make this extendable
-			try {
-				switch (change.type) {
-					case 'createShape':
-						editor.createShape(change.shape)
-						break
-					case 'updateShape':
-						editor.updateShape(change.shape)
-						break
-					case 'deleteShape': {
-						editor.deleteShape(change.shapeId)
-						break
-					}
-					default:
-						exhaustiveSwitchError(change)
+		try {
+			switch (change.type) {
+				case 'createShape':
+					editor.createShape(change.shape)
+					break
+				case 'updateShape':
+					editor.updateShape(change.shape)
+					break
+				case 'deleteShape': {
+					editor.deleteShape(change.shapeId)
+					break
 				}
-			} catch (e) {
-				console.error('Error handling change:', e)
+				default:
+					exhaustiveSwitchError(change)
 			}
+		} catch (e) {
+			console.error('Error handling change:', e)
 		}
-
-		return { input, handleChange }
 	}
 
 	/**
@@ -107,7 +79,7 @@ export class TldrawAiManager {
 	 * @param prompt The user's prompt
 	 * @param options Options to generate the input
 	 */
-	private async makeInput(
+	async makeInput(
 		prompt: TLAiPrompt['prompt'],
 		options = {} as TLAiGenerateOptions
 	): Promise<TLAiPrompt> {

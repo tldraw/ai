@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useEditor } from 'tldraw'
 import { TldrawAiManager } from '../TldrawAiManager'
-import { simpleIdTransforms } from './simpleIds'
+import { SimpleIds } from './SimpleIds'
 import { fakeAiServer } from '../../server/aiDemoServer'
 import { TLAiPrompt } from '../../shared/ai-shared'
 
@@ -10,11 +10,7 @@ export function useTldrawAiDemo() {
 	const [ai, setAi] = useState<TldrawAiManager | null>(null)
 
 	useEffect(() => {
-		setAi(
-			new TldrawAiManager(editor, {
-				transform: simpleIdTransforms,
-			})
-		)
+		setAi(new TldrawAiManager(editor))
 
 		return () => {
 			ai?.dispose()
@@ -23,16 +19,25 @@ export function useTldrawAiDemo() {
 
 	return useCallback(
 		(prompt: TLAiPrompt['prompt']) =>
-			new Promise<void>((r) => {
+			new Promise<void>(async (r) => {
 				if (!ai) return
-				ai.generate(prompt).then(async ({ input, handleChange }) => {
-					console.log('input!', input)
-					for await (const change of fakeAiServer(input)) {
-						handleChange(change)
-					}
-					console.log('done!')
-					r()
-				})
+				// Create the input information
+				// Create the transformation helper
+				// Transform the input
+				// Send the transformed input to a backend that generates changes
+				// As each change is generated... apply the reverse transform and then apply the change
+
+				const input = await ai.makeInput(prompt)
+				const idsHelper = new SimpleIds(editor)
+				const transformedInput = idsHelper.transformInput(input)
+				const generatedChanges = fakeAiServer(transformedInput)
+
+				for await (const change of generatedChanges) {
+					const transformedChange = idsHelper.transformChange(change)
+					ai.applyChange(transformedChange)
+				}
+
+				r()
 			}),
 		[ai]
 	)

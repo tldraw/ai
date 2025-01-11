@@ -20,12 +20,19 @@ type TLAiMessage =
 	  }
 // Include responses? Or just the description / intent of the response?
 
-export type TLAiTransform = () => {
-	transformInput?(editor: Editor, prompt: TLAiPrompt): TLAiPrompt
-	transformChange?(editor: Editor, change: TLAiChange): TLAiChange
+export abstract class TLAiTransform {
+	constructor(public editor: Editor) {}
+	transformInput?(prompt: TLAiPrompt): TLAiPrompt
+	transformChange?(change: TLAiChange): TLAiChange
 }
 
-export function createTldrawAiTransform(transform: TLAiTransform) {
+export interface TLAiTransformConstructor {
+	new (editor: Editor): TLAiTransform
+}
+
+export function createTldrawAiTransform<const T extends TLAiTransform>(
+	transform: T
+) {
 	return transform
 }
 
