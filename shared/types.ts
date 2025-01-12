@@ -1,22 +1,11 @@
 import {
-	TLShape,
-	Box,
-	TLShapePartial,
-	TLShapeId,
-	TLContent,
-	TLBinding,
-	Editor,
+	type TLShapePartial,
+	type TLShapeId,
+	type Box,
+	type TLBinding,
+	type TLContent,
+	type TLShape,
 } from 'tldraw'
-
-export abstract class TLAiTransform {
-	constructor(public editor: Editor) {}
-	transformPrompt?(prompt: TLAiPrompt): TLAiPrompt
-	transformChange?(change: TLAiChange): TLAiChange
-}
-
-export interface TLAiTransformConstructor {
-	new (editor: Editor): TLAiTransform
-}
 
 type TLAiMessage =
 	| {

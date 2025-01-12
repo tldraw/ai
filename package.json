@@ -10,18 +10,25 @@
 	"license": "MIT",
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
+		"dev": "concurrently --kill-others --names client,worker --prefix-colors blue,red yarn:dev:client yarn:dev:worker",
+		"dev:client": "vite",
+		"dev:worker": "wrangler dev",
 		"build": "tsc && vite build",
 		"lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@cloudflare/workers-types": "^4.20250109.0",
 		"@google/generative-ai": "^0.21.0",
 		"@types/jest": "^29.5.14",
 		"@types/node": "^22.10.5",
+		"cloudflare-workers-unfurl": "^0.0.7",
+		"concurrently": "^9.1.2",
+		"itty-router": "^5.0.18",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"tldraw": "3.7.0"
+		"tldraw": "3.7.0",
+		"wrangler": "^3.101.0"
 	},
 	"devDependencies": {
 		"@types/react": "^18.2.0",

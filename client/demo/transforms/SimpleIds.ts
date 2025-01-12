@@ -1,8 +1,9 @@
 import { createShapeId } from '@tldraw/tlschema'
-import { exhaustiveSwitchError } from '../../shared/utils'
-import { TLAiChange, TLAiPrompt, TLAiTransform } from '../../shared/ai-shared'
+import { TLAiPrompt, TLAiChange } from '../../../shared/types'
+import { exhaustiveSwitchError } from '../../../shared/utils'
+import { TldrawAiTransform } from '../../ai/TldrawAiTransform'
 
-export class SimpleIds extends TLAiTransform {
+export class SimpleIds extends TldrawAiTransform {
 	originalIdsToSimpleIds = new Map()
 	simpleIdsToOriginalIds = new Map()
 	nextSimpleId = 0
@@ -51,7 +52,7 @@ export class SimpleIds extends TLAiTransform {
 		}
 	}
 
-	private mapObjectWithIdAndWriteSimple(obj: { id: string }) {
+	private mapObjectWithIdAndWriteSimple = (obj: { id: string }) => {
 		const { originalIdsToSimpleIds, simpleIdsToOriginalIds, nextSimpleId } =
 			this
 
@@ -65,7 +66,7 @@ export class SimpleIds extends TLAiTransform {
 		return obj
 	}
 
-	private writeOriginalIds(obj: { id: string }) {
+	private writeOriginalIds = (obj: { id: string }) => {
 		const { simpleIdsToOriginalIds } = this
 		const id = simpleIdsToOriginalIds.get(obj.id)
 		if (id) {

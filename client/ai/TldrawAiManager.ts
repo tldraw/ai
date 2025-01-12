@@ -1,21 +1,18 @@
 import {
-	Box,
-	Editor,
-	FileHelpers,
-	getSvgAsImage,
-	TLBinding,
-	TLContent,
 	TLShape,
+	TLBinding,
+	Editor,
+	Box,
+	TLContent,
+	getSvgAsImage,
+	FileHelpers,
 } from 'tldraw'
-import { exhaustiveSwitchError, mapObjectMapValues } from '../shared/utils'
-import {
-	TLAiChange,
-	TLAiPrompt,
-	TLAiTransformConstructor,
-} from '../shared/ai-shared'
+import { TLAiPrompt, TLAiChange } from '../../shared/types'
+import { mapObjectMapValues, exhaustiveSwitchError } from '../../shared/utils'
+import { TldrawAiTransformConstructor } from './TldrawAiTransform'
 
 export interface TldrawAiManagerOptions {
-	transforms?: TLAiTransformConstructor[]
+	transforms?: TldrawAiTransformConstructor[]
 }
 
 /**

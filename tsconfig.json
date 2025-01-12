@@ -16,11 +16,11 @@
 
 		/* Linting */
 		"strict": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
 		"noFallthroughCasesInSwitch": true,
 		"types": ["node", "@types/jest"]
 	},
-	"include": ["src"],
+	"include": ["client", "shared", "worker"],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }

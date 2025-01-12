@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useEditor } from 'tldraw'
+import { TldrawAiManager, TldrawAiManagerOptions } from './TldrawAiManager'
 import { useShallowObjectIdentity } from '../../shared/utils'
-import { TldrawAiManager, TldrawAiManagerOptions } from '../TldrawAiManager'
 
 export function useTldrawAi(options: TldrawAiManagerOptions = {}) {
 	const editor = useEditor()

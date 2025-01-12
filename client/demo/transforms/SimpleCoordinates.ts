@@ -1,7 +1,8 @@
-import { TLAiChange, TLAiPrompt, TLAiTransform } from '../../shared/ai-shared'
 import { Box, isPageId } from 'tldraw'
+import { TLAiPrompt, TLAiChange } from '../../../shared/types'
+import { TldrawAiTransform } from '../../ai/TldrawAiTransform'
 
-export class SimpleCoordinates extends TLAiTransform {
+export class SimpleCoordinates extends TldrawAiTransform {
 	offset = { x: 0, y: 0 }
 	offsetIds = new Set<string>()
 

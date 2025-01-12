@@ -8,8 +8,9 @@ import {
 	ResponseSchema,
 	SchemaType,
 } from '@google/generative-ai'
-import { TLAiPrompt } from '../ai/shared/ai-shared'
-import { TLShapePartial } from 'tldraw'
+import { Environment } from '../types'
+// import { TLShapePartial } from 'tldraw'
+// import { TLAiPrompt } from '../../shared/types'
 
 /**
  * Get a base64 string from a URL. Fetch the URL and return the mimetype and data as base64.
@@ -31,24 +32,6 @@ export interface GoogleModel {
 		request: GenerateContentRequest | string | Array<string | Part>,
 		requestOptions?: SingleRequestOptions
 	): Promise<GenerateContentResult>
-}
-
-type SchemaExample = {
-	summary: string
-	changes: (
-		| {
-				type: 'create'
-				shape: TLShapePartial
-		  }
-		| {
-				type: 'update'
-				shape: TLShapePartial
-		  }
-		| {
-				type: 'delete'
-				id: string
-		  }
-	)[]
 }
 
 const commandsSchema: ResponseSchema = {
@@ -125,7 +108,7 @@ const commandsSchema: ResponseSchema = {
 								required: ['w', 'h', 'color', 'fill'],
 							},
 						},
-						required: ['id', 'description', 'type'],
+						required: ['id', 'type'],
 					},
 				},
 				required: ['type', 'shape'],
@@ -137,25 +120,22 @@ const commandsSchema: ResponseSchema = {
 
 const isGemeni2 = true
 
-const model = new GoogleGenerativeAI(
-	isGemeni2
-		? import.meta.env.VITE_GOOGLE_GENERATIVE_AI_API_KEY_2
-		: import.meta.env.VITE_GOOGLE_GENERATIVE_AI_API_KEY
-).getGenerativeModel({
-	model: isGemeni2 ? 'gemini-2.0-flash-exp' : 'gemini-1.5-flash-latest',
-	systemInstruction:
-		'You are an AI assistant that can create, update, and delete shapes on a canvas. Examine the provided prompt, data about the existing canvas content, and image of the canvas. Using the schema provided, product changes to be applied to the canvas in response to the user prompt. All shape ids must be formatted as "shape:1", "shape:2", etc. You must produce a response every time you are prompted. All numbers in your responses must be integers.',
-	generationConfig: {
-		responseMimeType: 'application/json',
-		responseSchema: commandsSchema,
-	},
-})
+export function getModel(apiKey: string) {
+	return new GoogleGenerativeAI(apiKey).getGenerativeModel({
+		model: isGemeni2 ? 'gemini-2.0-flash-exp' : 'gemini-1.5-flash-latest',
+		systemInstruction:
+			'You are an AI assistant that can create, update, and delete shapes on a canvas. Examine the provided prompt, data about the existing canvas content, and image of the canvas. Using the schema provided, product changes to be applied to the canvas in response to the user prompt. All shape ids must be formatted as "shape:1", "shape:2", etc. You must produce a response every time you are prompted. All numbers in your responses must be integers.',
+		generationConfig: {
+			responseMimeType: 'application/json',
+			responseSchema: commandsSchema,
+		},
+	})
+}
 
-export async function generateContent(
-	request: GenerateContentRequest | string | Array<string | Part>,
-	requestOptions?: SingleRequestOptions
-): Promise<GenerateContentResult> {
-	return await model.generateContent(request, requestOptions)
+export function getApiKey(env: Environment) {
+	return isGemeni2
+		? env.GOOGLE_GENERATIVE_AI_API_KEY_2
+		: env.GOOGLE_GENERATIVE_AI_API_KEY
 }
 
 /**
@@ -166,7 +146,7 @@ export async function generateContent(
  * @param inputsDescription - The description of the inputs to give to the model.
  * @param procedure - The procedure to give to the model.
  */
-export async function promptModel(prompt: TLAiPrompt) {
+export async function promptModel(model: GoogleModel, prompt: any) {
 	const imageParts: InlineDataPart[] = []
 
 	if (prompt.image) {

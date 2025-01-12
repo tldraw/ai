@@ -1,7 +1,7 @@
 import { Tldraw, useEditor } from 'tldraw'
 import { useEffect } from 'react'
-import { sleep } from './ai/shared/utils'
-import { useTldrawAiDemo } from './ai/demo/useTldrawAiDemo'
+import { sleep } from '../shared/utils'
+import { useTldrawAiDemo } from './demo/useTldrawAiDemo'
 
 function App() {
 	return (
@@ -21,14 +21,14 @@ function SneakyAiPlugin() {
 		;(window as any).editor = editor
 
 		let cancelled = false
-		async function promptAfterOneSecond() {
+		async function _promptAfterOneSecond() {
 			await sleep(2000)
 			if (cancelled) return
 			console.log('prompting')
 			await prompt(
 				'you are an autocomplete bot for my wireframe design bot. take the next three actions that you think that I am going to draw in this user interface wireframe. Incorporate visual feedback about what you see in the existing wireframe. Feel free to clean things up or reposition things if you think it will help.'
 			)
-			if (!cancelled) promptAfterOneSecond()
+			if (!cancelled) _promptAfterOneSecond()
 		}
 
 		// for shitty autocomplete...
