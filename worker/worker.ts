@@ -1,7 +1,11 @@
 import { AutoRouter, cors, error, IRequest } from 'itty-router'
 import { Environment } from './types'
 import { ExecutionContext } from '@cloudflare/workers-types'
-import { getApiKey, getModel, promptModel } from './models/google'
+import {
+	getGoogleApiKey,
+	getGoogleModel,
+	promptGoogleModel,
+} from './models/google'
 
 // Make the durable object available to the cloudflare worker
 export { TldrawAiDurableObject } from './TldrawAiDurableObject'
@@ -15,35 +19,18 @@ const router = AutoRouter<IRequest, [env: Environment, ctx: ExecutionContext]>({
 		return error(e)
 	},
 }).post('/generate', async (request, env) => {
-	const prompt = await request.json()
+	// eventually... use some kind of per-user id, so that each user has their own worker
+	const id = env.TLDRAW_AI_DURABLE_OBJECT.idFromName('anonymous')
+	const DO = env.TLDRAW_AI_DURABLE_OBJECT.get(id)
+	const response = await DO.fetch(request.url, {
+		method: 'POST',
+		body: request.body as any,
+	})
 
-	try {
-		const apiKey = getApiKey(env)
-		const model = getModel(apiKey)
-
-		console.log('Prompting model...')
-		const res = await promptModel(model, prompt)
-
-		const response = JSON.parse(res as string)
-		console.error('AI response:', response)
-
-		// Send back the response as a JSON object
-		return new Response(res, {
-			headers: { 'Content-Type': 'application/json' },
-		})
-	} catch (error: any) {
-		console.error('AI response error:', error)
-		return new Response(error)
-	}
-
-	// The request should have an auth header, just so that each user has their own worker
-	// const userId = request.headers.get('Authorization') ?? 'anonymous'
-	// const id = env.TLDRAW_AI_DURABLE_OBJECT.idFromName(userId)
-	// const DO = env.TLDRAW_AI_DURABLE_OBJECT.get(id)
-	// return DO.fetch(request.url, {
-	// 	method: 'POST',
-	// 	body: request.body as any,
-	// })
+	// todo: getting an immutable headers error from our cors middleware unless we create a new response
+	return new Response(response.body as BodyInit, {
+		headers: { 'Content-Type': 'application/json' },
+	})
 })
 
 // export our router for cloudflare

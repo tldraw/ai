@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-oysxwK/checked-fetch.js
+// .wrangler/tmp/bundle-zlwNVx/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -1121,10 +1121,6 @@ var commandsSchema = {
       type: SchemaType.STRING,
       description: "A detailed description of what you have done on the canvas."
     },
-    description: {
-      type: SchemaType.STRING,
-      description: 'The description of the shape, its role or function in the drawing; an answer to the question, "what is this shape for?".'
-    },
     // should be an array of TLAiChange
     changes: {
       type: SchemaType.ARRAY,
@@ -1135,6 +1131,10 @@ var commandsSchema = {
             type: SchemaType.STRING,
             description: "The type of change to make.",
             enum: ["createShape", "updateShape", "deleteShape"]
+          },
+          description: {
+            type: SchemaType.STRING,
+            description: 'The description of the shape, its role or function in the drawing; an answer to the question, "what is this shape for?".'
           },
           shape: {
             type: SchemaType.OBJECT,
@@ -1182,21 +1182,20 @@ var commandsSchema = {
                     type: SchemaType.STRING,
                     description: "The text to display inside of the shape."
                   }
-                },
-                required: ["w", "h", "color", "fill"]
+                }
               }
             },
             required: ["id", "type"]
           }
         },
-        required: ["type", "shape"]
+        required: ["type", "shape", "description"]
       }
     }
   },
   required: ["summary", "changes"]
 };
 var isGemeni2 = true;
-function getModel(apiKey) {
+function getGoogleModel(apiKey) {
   return new GoogleGenerativeAI(apiKey).getGenerativeModel({
     model: isGemeni2 ? "gemini-2.0-flash-exp" : "gemini-1.5-flash-latest",
     systemInstruction: 'You are an AI assistant that can create, update, and delete shapes on a canvas. Examine the provided prompt, data about the existing canvas content, and image of the canvas. Using the schema provided, product changes to be applied to the canvas in response to the user prompt. All shape ids must be formatted as "shape:1", "shape:2", etc. You must produce a response every time you are prompted. All numbers in your responses must be integers.',
@@ -1206,12 +1205,12 @@ function getModel(apiKey) {
     }
   });
 }
-__name(getModel, "getModel");
-function getApiKey(env) {
+__name(getGoogleModel, "getGoogleModel");
+function getGoogleApiKey(env) {
   return isGemeni2 ? env.GOOGLE_GENERATIVE_AI_API_KEY_2 : env.GOOGLE_GENERATIVE_AI_API_KEY;
 }
-__name(getApiKey, "getApiKey");
-async function promptModel(model, prompt) {
+__name(getGoogleApiKey, "getGoogleApiKey");
+async function promptGoogleModel(model, prompt) {
   const imageParts = [];
   if (prompt.image) {
     imageParts.push({
@@ -1223,24 +1222,24 @@ async function promptModel(model, prompt) {
   }
   return await model.generateContent([JSON.stringify(prompt), ...imageParts]).then((r2) => r2.response.text());
 }
-__name(promptModel, "promptModel");
+__name(promptGoogleModel, "promptGoogleModel");
 
 // worker/TldrawAiDurableObject.ts
 var TldrawAiDurableObject = class {
   constructor(_ctx, env) {
     this._ctx = _ctx;
     this.env = env;
+    const apiKey = getGoogleApiKey(this.env);
+    const model = getGoogleModel(apiKey);
+    this.googleModel = model;
   }
+  googleModel;
   router = n({
     catch: (e) => {
       console.log(e);
       return s(e);
     }
-  }).post("/generate", async (request) => {
-    return this.generate(request);
-  }).post("/stream", async (request) => {
-    return this.stream(request);
-  });
+  }).post("/generate", (request) => this.generate(request)).post("/stream", (request) => this.stream(request));
   // `fetch` is the entry point for all requests to the Durable Object
   fetch(request) {
     return this.router.fetch(request);
@@ -1253,20 +1252,17 @@ var TldrawAiDurableObject = class {
    */
   async generate(request) {
     const prompt = await request.json();
-    let timeout = 0;
-    const timeoutPromise = new Promise((_, reject) => {
-      timeout = setTimeout(() => {
-        console.log("timeout!");
-        reject(new Error("Timed out while waiting for AI response"));
-      }, 3e4);
-    });
     try {
-      return new Response("ok");
+      console.log("Prompting model...");
+      const res = await promptGoogleModel(this.googleModel, prompt);
+      const response = JSON.parse(res);
+      console.error("AI response:", response);
+      return new Response(res, {
+        headers: { "Content-Type": "application/json" }
+      });
     } catch (error) {
       console.error("AI response error:", error);
       return new Response(error);
-    } finally {
-      clearTimeout(timeout);
     }
   }
   /**
@@ -1296,14 +1292,12 @@ var TldrawAiDurableObject = class {
     });
   }
   async *generateChanges(prompt) {
-    let timeout = 0;
-    const timeoutPromise = new Promise((_, reject) => {
-      timeout = setTimeout(() => {
-        console.log("timeout!");
-        reject(new Error("Timed out while waiting for AI response"));
-      }, 3e4);
-    });
     try {
+      const res = await promptGoogleModel(this.googleModel, prompt);
+      const response = JSON.parse(res);
+      for (const change of response.changes) {
+        yield change;
+      }
     } catch (error) {
       console.error("AI response error:", error);
       return;
@@ -1322,21 +1316,15 @@ var router = n({
     return s(e);
   }
 }).post("/generate", async (request, env) => {
-  const prompt = await request.json();
-  try {
-    const apiKey = getApiKey(env);
-    const model = getModel(apiKey);
-    console.log("Prompting model...");
-    const res = await promptModel(model, prompt);
-    const response = JSON.parse(res);
-    console.error("AI response:", response);
-    return new Response(res, {
-      headers: { "Content-Type": "application/json" }
-    });
-  } catch (error) {
-    console.error("AI response error:", error);
-    return new Response(error);
-  }
+  const id = env.TLDRAW_AI_DURABLE_OBJECT.idFromName("anonymous");
+  const DO = env.TLDRAW_AI_DURABLE_OBJECT.get(id);
+  const response = await DO.fetch(request.url, {
+    method: "POST",
+    body: request.body
+  });
+  return new Response(response.body, {
+    headers: { "Content-Type": "application/json" }
+  });
 });
 var worker_default = router;
 
@@ -1381,7 +1369,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-oysxwK/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-zlwNVx/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -1413,7 +1401,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-oysxwK/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-zlwNVx/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

@@ -9,8 +9,7 @@ import {
 	SchemaType,
 } from '@google/generative-ai'
 import { Environment } from '../types'
-// import { TLShapePartial } from 'tldraw'
-// import { TLAiPrompt } from '../../shared/types'
+import { TLAiPrompt } from '../../shared/types'
 
 /**
  * Get a base64 string from a URL. Fetch the URL and return the mimetype and data as base64.
@@ -42,11 +41,6 @@ const commandsSchema: ResponseSchema = {
 			description:
 				'A detailed description of what you have done on the canvas.',
 		},
-		description: {
-			type: SchemaType.STRING,
-			description:
-				'The description of the shape, its role or function in the drawing; an answer to the question, "what is this shape for?".',
-		},
 		// should be an array of TLAiChange
 		changes: {
 			type: SchemaType.ARRAY,
@@ -57,6 +51,11 @@ const commandsSchema: ResponseSchema = {
 						type: SchemaType.STRING,
 						description: 'The type of change to make.',
 						enum: ['createShape', 'updateShape', 'deleteShape'],
+					},
+					description: {
+						type: SchemaType.STRING,
+						description:
+							'The description of the shape, its role or function in the drawing; an answer to the question, "what is this shape for?".',
 					},
 					shape: {
 						type: SchemaType.OBJECT,
@@ -105,13 +104,12 @@ const commandsSchema: ResponseSchema = {
 										description: 'The text to display inside of the shape.',
 									},
 								},
-								required: ['w', 'h', 'color', 'fill'],
 							},
 						},
 						required: ['id', 'type'],
 					},
 				},
-				required: ['type', 'shape'],
+				required: ['type', 'shape', 'description'],
 			},
 		},
 	},
@@ -120,7 +118,7 @@ const commandsSchema: ResponseSchema = {
 
 const isGemeni2 = true
 
-export function getModel(apiKey: string) {
+export function getGoogleModel(apiKey: string) {
 	return new GoogleGenerativeAI(apiKey).getGenerativeModel({
 		model: isGemeni2 ? 'gemini-2.0-flash-exp' : 'gemini-1.5-flash-latest',
 		systemInstruction:
@@ -132,7 +130,7 @@ export function getModel(apiKey: string) {
 	})
 }
 
-export function getApiKey(env: Environment) {
+export function getGoogleApiKey(env: Environment) {
 	return isGemeni2
 		? env.GOOGLE_GENERATIVE_AI_API_KEY_2
 		: env.GOOGLE_GENERATIVE_AI_API_KEY
@@ -146,7 +144,10 @@ export function getApiKey(env: Environment) {
  * @param inputsDescription - The description of the inputs to give to the model.
  * @param procedure - The procedure to give to the model.
  */
-export async function promptModel(model: GoogleModel, prompt: any) {
+export async function promptGoogleModel(
+	model: GoogleModel,
+	prompt: TLAiPrompt
+) {
 	const imageParts: InlineDataPart[] = []
 
 	if (prompt.image) {
