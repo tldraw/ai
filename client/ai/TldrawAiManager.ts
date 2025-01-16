@@ -1,14 +1,6 @@
-import {
-	TLShape,
-	TLBinding,
-	Editor,
-	Box,
-	TLContent,
-	getSvgAsImage,
-	FileHelpers,
-} from 'tldraw'
-import { TLAiPrompt, TLAiChange } from '../../shared/types'
-import { mapObjectMapValues, exhaustiveSwitchError } from '../../shared/utils'
+import { Box, Editor, FileHelpers, TLBinding, TLShape, getSvgAsImage } from 'tldraw'
+import { TLAiChange, TLAiContent, TLAiPrompt } from '../../shared/types'
+import { exhaustiveSwitchError, mapObjectMapValues } from '../../shared/utils'
 import { TldrawAiTransformConstructor } from './TldrawAiTransform'
 
 export interface TldrawAiManagerOptions {
@@ -22,25 +14,21 @@ export interface TldrawAiManagerOptions {
  */
 export class TldrawAiManager {
 	// A mapping of shape type to shape props
-	shapes: Record<TLShape['type'], TLShape['props']>
+	defaultShapeProps: Record<TLShape['type'], TLShape['props']>
 
 	// A mapping of binding type to binding props
-	bindings: Record<TLBinding['type'], TLBinding['props']>
+	defaultBindingProps: Record<TLBinding['type'], TLBinding['props']>
 
 	constructor(
 		public readonly editor: Editor,
 		public readonly options = {} as TldrawAiManagerOptions
 	) {
-		this.shapes = mapObjectMapValues(
-			this.editor.shapeUtils,
-			(_, util) => util?.getDefaultProps()
-			// (_, util) => (util!.constructor as TLAnyShapeUtilConstructor).props
+		this.defaultShapeProps = mapObjectMapValues(this.editor.shapeUtils, (_, util) =>
+			util?.getDefaultProps()
 		) as Record<TLShape['type'], TLShape['props']>
 
-		this.bindings = mapObjectMapValues(
-			this.editor.bindingUtils,
-			(_, util) => util?.getDefaultProps()
-			// (_, util) => (util!.constructor as TLAnyBindingUtilConstructor).props
+		this.defaultBindingProps = mapObjectMapValues(this.editor.bindingUtils, (_, util) =>
+			util?.getDefaultProps()
 		) as Record<TLBinding['type'], TLBinding['props']>
 	}
 
@@ -75,9 +63,18 @@ export class TldrawAiManager {
 			this.applyChange(change)
 		}
 
+		const handleChanges = (changes: TLAiChange[]) => {
+			for (const transform of transforms) {
+				if (transform.transformChanges) {
+					changes = transform.transformChanges(changes)
+				}
+			}
+		}
+
 		return {
 			prompt,
 			handleChange,
+			handleChanges,
 		}
 	}
 
@@ -119,29 +116,27 @@ export class TldrawAiManager {
 	 */
 	async getPrompt(
 		prompt: TLAiPrompt['message'],
-		options = {} as Partial<
-			Pick<TLAiPrompt, 'content' | 'contextBounds' | 'promptBounds'>
-		>
+		options = {} as Partial<Pick<TLAiPrompt, 'canvasContent' | 'contextBounds' | 'promptBounds'>>
 	): Promise<TLAiPrompt> {
-		const { editor, shapes, bindings } = this
+		const { editor, defaultShapeProps, defaultBindingProps } = this
 		const {
 			contextBounds = editor.getViewportPageBounds(),
 			promptBounds = editor.getViewportPageBounds(),
 		} = options
 
-		const content = options.content ?? this.getContent(promptBounds)
+		const content = options.canvasContent ?? this.getContent(promptBounds)
 
 		// Get image from the content
 		const image = await this.getImage(content)
 
 		return {
 			message: prompt,
-			content,
+			canvasContent: content,
 			contextBounds,
 			promptBounds,
 			image,
-			shapes,
-			bindings,
+			defaultShapeProps,
+			defaultBindingProps,
 		}
 	}
 
@@ -150,13 +145,13 @@ export class TldrawAiManager {
 	 *
 	 * @param bounds The bounds to get the content for
 	 */
-	private getContent(bounds: Box): TLContent {
+	private getContent(bounds: Box): TLAiContent {
 		const { editor } = this
 
 		// Get the page content (same as what we put on the clipboard when a user copies) for the shapes
 		// that are included (contained or colliding with) the provided bounds
 
-		let content = editor.getContentFromCurrentPage(
+		let content: TLAiContent | undefined = editor.getContentFromCurrentPage(
 			editor
 				.getCurrentPageShapesSorted()
 				.filter((s) => bounds.includes(editor.getShapeMaskedPageBounds(s)!))
@@ -164,13 +159,16 @@ export class TldrawAiManager {
 
 		// If we don't have content, it's either an empty page or an empty section of the page.
 		// This is an acceptable case; but let's send along an empty content instead of undefined.
-		if (!content) {
+		if (content) {
+			// the content is a TLContent, but we want to omit the schema for TLAiContent
+			content.shapes = structuredClone(content.shapes)
+			delete (content as any).schema
+		} else {
 			content = {
 				shapes: [],
 				bindings: [],
 				rootShapeIds: [],
 				assets: [],
-				schema: editor.store.schema.serialize(),
 			}
 		}
 
@@ -182,7 +180,7 @@ export class TldrawAiManager {
 	 *
 	 * @param content The content to get the image from
 	 */
-	private async getImage(content: TLContent) {
+	private async getImage(content: TLAiContent) {
 		// Get image from the content
 		let image: string | undefined = undefined
 

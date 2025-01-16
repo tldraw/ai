@@ -1,13 +1,9 @@
 import { DurableObjectState } from '@cloudflare/workers-types'
-import { Environment } from './types'
+import { GenerativeModel } from '@google/generative-ai'
 import { AutoRouter, error } from 'itty-router'
 import { TLAiPrompt } from '../shared/types'
-import {
-	getGoogleApiKey,
-	getGoogleModel,
-	promptGoogleModel,
-} from './models/google'
-import { GenerativeModel, GoogleGenerativeAI } from '@google/generative-ai'
+import { getGoogleApiKey, getGoogleModel, promptGoogleModel } from './models/google'
+import { Environment } from './types'
 
 export class TldrawAiDurableObject {
 	googleModel: GenerativeModel
@@ -47,8 +43,10 @@ export class TldrawAiDurableObject {
 
 		try {
 			console.log('Prompting model...')
+			console.log(prompt)
 			const res = await promptGoogleModel(this.googleModel, prompt)
 
+			console.log(res)
 			const response = JSON.parse(res as string)
 			console.error('AI response:', response)
 

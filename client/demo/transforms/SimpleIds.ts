@@ -1,5 +1,5 @@
 import { createShapeId } from '@tldraw/tlschema'
-import { TLAiPrompt, TLAiChange } from '../../../shared/types'
+import { TLAiChange, TLAiPrompt } from '../../../shared/types'
 import { exhaustiveSwitchError } from '../../../shared/utils'
 import { TldrawAiTransform } from '../../ai/TldrawAiTransform'
 
@@ -10,7 +10,7 @@ export class SimpleIds extends TldrawAiTransform {
 
 	transformPrompt = (input: TLAiPrompt) => {
 		// Collect all ids, write simple ids, and write the simple ids
-		for (const shape of input.content.shapes) {
+		for (const shape of input.canvasContent.shapes) {
 			this.collectAllIdsRecursively(shape, this.mapObjectWithIdAndWriteSimple)
 		}
 
@@ -20,10 +20,7 @@ export class SimpleIds extends TldrawAiTransform {
 	transformChange = (change: TLAiChange) => {
 		switch (change.type) {
 			case 'createShape': {
-				const shape = this.collectAllIdsRecursively(
-					change.shape,
-					this.writeOriginalIds
-				)
+				const shape = this.collectAllIdsRecursively(change.shape, this.writeOriginalIds)
 
 				return {
 					...change,
@@ -31,10 +28,7 @@ export class SimpleIds extends TldrawAiTransform {
 				}
 			}
 			case 'updateShape': {
-				const shape = this.collectAllIdsRecursively(
-					change.shape,
-					this.writeOriginalIds
-				)
+				const shape = this.collectAllIdsRecursively(change.shape, this.writeOriginalIds)
 
 				return {
 					...change,
@@ -53,8 +47,7 @@ export class SimpleIds extends TldrawAiTransform {
 	}
 
 	private mapObjectWithIdAndWriteSimple = (obj: { id: string }) => {
-		const { originalIdsToSimpleIds, simpleIdsToOriginalIds, nextSimpleId } =
-			this
+		const { originalIdsToSimpleIds, simpleIdsToOriginalIds, nextSimpleId } = this
 
 		if (!originalIdsToSimpleIds.has(obj.id)) {
 			originalIdsToSimpleIds.set(obj.id, `${nextSimpleId}`)

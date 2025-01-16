@@ -1,22 +1,37 @@
 import { Box, isPageId } from 'tldraw'
-import { TLAiPrompt, TLAiChange } from '../../../shared/types'
+import { TLAiChange, TLAiPrompt } from '../../../shared/types'
 import { TldrawAiTransform } from '../../ai/TldrawAiTransform'
 
 export class SimpleCoordinates extends TldrawAiTransform {
 	offset = { x: 0, y: 0 }
 	offsetIds = new Set<string>()
+	adjustments: Record<string, number> = {}
 
 	transformPrompt = (input: TLAiPrompt) => {
 		const { editor } = this
 
 		const bounds = Box.Common(
-			input.content.shapes.map((s) => editor.getShapePageBounds(s.id)!)
+			input.canvasContent.shapes.map((s) => editor.getShapePageBounds(s.id)!)
 		)
 
 		this.offset.x = bounds.x
 		this.offset.y = bounds.y
 
-		input.content.shapes = input.content.shapes.map((s) => {
+		for (const s of input.canvasContent.shapes) {
+			for (const prop of ['x', 'y'] as const) {
+				this.adjustments[s.id + '_' + prop] = s[prop]
+			}
+			for (const key in s.props) {
+				// @ts-expect-error
+				const val = s.props[key]
+				if (Number.isFinite(val)) {
+					this.adjustments[s.id + '_' + key] = val
+					;(s.props as any)[key] = Math.floor(val)
+				}
+			}
+		}
+
+		input.canvasContent.shapes = input.canvasContent.shapes.map((s) => {
 			if (isPageId(s.parentId)) {
 				this.offsetIds.add(s.id)
 				return {

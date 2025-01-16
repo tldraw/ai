@@ -1,9 +1,9 @@
 import { useCallback } from 'react'
-import { SimpleIds } from './transforms/SimpleIds'
+import { TLAiChange, TLAiPrompt } from '../../shared/types'
+import { useTldrawAi } from '../ai/useTldrawAi'
 import { ShapeDescriptions } from './transforms/ShapeDescriptions'
 import { SimpleCoordinates } from './transforms/SimpleCoordinates'
-import { TLAiPrompt, TLAiChange } from '../../shared/types'
-import { useTldrawAi } from '../ai/useTldrawAi'
+import { SimpleIds } from './transforms/SimpleIds'
 
 export function useTldrawAiDemo() {
 	const ai = useTldrawAi({
@@ -11,26 +11,52 @@ export function useTldrawAiDemo() {
 	})
 
 	return useCallback(
-		(message: TLAiPrompt['message']) =>
-			new Promise<void>(async (r) => {
-				if (!ai) return
+		(message: TLAiPrompt['message']) => {
+			let cancelled = false
+			const controller = new AbortController()
+			const signal = controller.signal
 
-				const { prompt, handleChange } = await ai.generate(message)
+			const promise = new Promise<void>(async (resolve) => {
+				if (ai) {
+					const { prompt, handleChange } = await ai.generate(message)
 
-				const changes = await getChangesFromBackend(prompt)
+					console.log(prompt)
 
-				for (const change of changes) {
-					handleChange(change)
+					const changes = await getChangesFromBackend(prompt, signal).catch((error) => {
+						if (error.name === 'AbortError') {
+							console.error('Cancelled')
+						} else {
+							console.error('Fetch error:', error)
+						}
+					})
+
+					if (changes && !cancelled) {
+						for (const change of changes) {
+							handleChange(change)
+						}
+					}
 				}
 
-				r()
-			}),
+				resolve()
+			})
+
+			return {
+				// the promise that will resolve the changes
+				promise,
+				// a helper to cancel the request
+				cancel: () => {
+					cancelled = true
+					controller.abort()
+				},
+			}
+		},
 		[ai]
 	)
 }
 
 async function getChangesFromBackend(
-	prompt: TLAiPrompt
+	prompt: TLAiPrompt,
+	signal: AbortSignal
 ): Promise<TLAiChange[]> {
 	const res = await fetch(`${process.env.VITE_AI_SERVER_URL}/generate`, {
 		method: 'POST',
@@ -38,6 +64,7 @@ async function getChangesFromBackend(
 		headers: {
 			'Content-Type': 'application/json',
 		},
+		signal: signal,
 	})
 
 	const result: {

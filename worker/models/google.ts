@@ -1,15 +1,18 @@
 import {
-	InlineDataPart,
 	GenerateContentRequest,
-	Part,
-	SingleRequestOptions,
 	GenerateContentResult,
 	GoogleGenerativeAI,
+	InlineDataPart,
+	Part,
 	ResponseSchema,
 	SchemaType,
+	SingleRequestOptions,
 } from '@google/generative-ai'
-import { Environment } from '../types'
 import { TLAiPrompt } from '../../shared/types'
+import { Environment } from '../types'
+import { SYSTEM_INSTRUCTION } from './prompt'
+
+const IS_GEMINI_2 = true
 
 /**
  * Get a base64 string from a URL. Fetch the URL and return the mimetype and data as base64.
@@ -21,8 +24,7 @@ export async function getBase64FromUrl(src: string) {
 	const buffer = await response.arrayBuffer()
 	return {
 		base64Data: Buffer.from(buffer).toString('base64'),
-		mimeType:
-			response.headers.get('content-type') || 'application/octet-stream',
+		mimeType: response.headers.get('content-type') || 'application/octet-stream',
 	}
 }
 
@@ -38,8 +40,7 @@ const commandsSchema: ResponseSchema = {
 	properties: {
 		summary: {
 			type: SchemaType.STRING,
-			description:
-				'A detailed description of what you have done on the canvas.',
+			description: 'A detailed description of what you have done on the canvas.',
 		},
 		// should be an array of TLAiChange
 		changes: {
@@ -72,26 +73,26 @@ const commandsSchema: ResponseSchema = {
 							},
 							x: {
 								type: SchemaType.NUMBER,
-								description: 'The x position of the shape.',
+								description: 'The x position of the shape as an integer.',
 							},
 							y: {
 								type: SchemaType.NUMBER,
-								description: 'The y position of the shape.',
+								description: 'The y position of the shape as an integer.',
 							},
 							props: {
 								type: SchemaType.OBJECT,
 								properties: {
 									w: {
 										type: SchemaType.NUMBER,
-										description: 'The width of the shape.',
+										description: 'The width of the shape as an integer.',
 									},
 									h: {
 										type: SchemaType.NUMBER,
-										description: 'The height of the shape.',
+										description: 'The height of the shape as an integer.',
 									},
 									color: {
 										type: SchemaType.STRING,
-										description: 'The color of the shape.',
+										description: 'The color of the shape as an integer.',
 										enum: ['red', 'blue', 'green', 'black'],
 									},
 									fill: {
@@ -116,13 +117,10 @@ const commandsSchema: ResponseSchema = {
 	required: ['summary', 'changes'],
 }
 
-const isGemeni2 = true
-
 export function getGoogleModel(apiKey: string) {
 	return new GoogleGenerativeAI(apiKey).getGenerativeModel({
-		model: isGemeni2 ? 'gemini-2.0-flash-exp' : 'gemini-1.5-flash-latest',
-		systemInstruction:
-			'You are an AI assistant that can create, update, and delete shapes on a canvas. Examine the provided prompt, data about the existing canvas content, and image of the canvas. Using the schema provided, product changes to be applied to the canvas in response to the user prompt. All shape ids must be formatted as "shape:1", "shape:2", etc. You must produce a response every time you are prompted. All numbers in your responses must be integers.',
+		model: IS_GEMINI_2 ? 'gemini-2.0-flash-exp' : 'gemini-1.5-flash-latest',
+		systemInstruction: SYSTEM_INSTRUCTION,
 		generationConfig: {
 			responseMimeType: 'application/json',
 			responseSchema: commandsSchema,
@@ -131,9 +129,7 @@ export function getGoogleModel(apiKey: string) {
 }
 
 export function getGoogleApiKey(env: Environment) {
-	return isGemeni2
-		? env.GOOGLE_GENERATIVE_AI_API_KEY_2
-		: env.GOOGLE_GENERATIVE_AI_API_KEY
+	return IS_GEMINI_2 ? env.GOOGLE_GENERATIVE_AI_API_KEY_2 : env.GOOGLE_GENERATIVE_AI_API_KEY
 }
 
 /**
@@ -144,10 +140,7 @@ export function getGoogleApiKey(env: Environment) {
  * @param inputsDescription - The description of the inputs to give to the model.
  * @param procedure - The procedure to give to the model.
  */
-export async function promptGoogleModel(
-	model: GoogleModel,
-	prompt: TLAiPrompt
-) {
+export async function promptGoogleModel(model: GoogleModel, prompt: TLAiPrompt) {
 	const imageParts: InlineDataPart[] = []
 
 	if (prompt.image) {
@@ -158,6 +151,14 @@ export async function promptGoogleModel(
 			},
 		})
 	}
+
+	const safePrompt = { ...prompt }
+	// delete safePrompt.defaultBindingProps
+	// delete safePrompt.defaultShapeProps
+	// delete safePrompt.promptBounds
+	// delete safePrompt.contextBounds
+
+	console.log(safePrompt)
 
 	return await model
 		.generateContent([JSON.stringify(prompt), ...imageParts])
