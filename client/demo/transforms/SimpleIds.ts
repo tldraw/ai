@@ -1,4 +1,4 @@
-import { createShapeId } from '@tldraw/tlschema'
+import { createBindingId, createShapeId } from '@tldraw/tlschema'
 import { TLAiChange, TLAiPrompt } from '../../../shared/types'
 import { exhaustiveSwitchError } from '../../../shared/utils'
 import { TldrawAiTransform } from '../../ai/TldrawAiTransform'
@@ -20,7 +20,12 @@ export class SimpleIds extends TldrawAiTransform {
 	transformChange = (change: TLAiChange) => {
 		switch (change.type) {
 			case 'createShape': {
-				const shape = this.collectAllIdsRecursively(change.shape, this.writeOriginalIds)
+				const { shape } = change
+				const { id: simpleId } = shape
+				const originalId = createShapeId(simpleId)
+				this.originalIdsToSimpleIds.set(originalId, simpleId)
+				this.simpleIdsToOriginalIds.set(simpleId, originalId)
+				shape.id = originalId
 
 				return {
 					...change,
@@ -36,9 +41,45 @@ export class SimpleIds extends TldrawAiTransform {
 				}
 			}
 			case 'deleteShape': {
+				const shapeId = this.simpleIdsToOriginalIds.get(change.shapeId)
+				if (!shapeId) {
+					throw new Error(`Shape id not found: ${change.shapeId}`)
+				}
 				return {
 					...change,
-					shapeId: createShapeId('1'), // this isn't going to be in our map of ids
+					shapeId, // this isn't going to be in our map of ids
+				}
+			}
+			case 'createBinding': {
+				const { binding } = change
+
+				const { id: simpleId } = binding
+				const originalId = createBindingId(simpleId)
+				this.originalIdsToSimpleIds.set(originalId, simpleId)
+				this.simpleIdsToOriginalIds.set(simpleId, originalId)
+				binding.id = originalId
+
+				return {
+					...change,
+					binding,
+				}
+			}
+			case 'updateBinding': {
+				const binding = this.collectAllIdsRecursively(change.binding, this.writeOriginalIds)
+
+				return {
+					...change,
+					binding,
+				}
+			}
+			case 'deleteBinding': {
+				const bindingId = this.simpleIdsToOriginalIds.get(change.bindingId)
+				if (!bindingId) {
+					throw new Error(`Binding id not found: ${change.bindingId}`)
+				}
+				return {
+					...change,
+					bindingId,
 				}
 			}
 			default:
@@ -46,24 +87,47 @@ export class SimpleIds extends TldrawAiTransform {
 		}
 	}
 
-	private mapObjectWithIdAndWriteSimple = (obj: { id: string }) => {
+	private mapObjectWithIdAndWriteSimple = (obj: { id: string; fromId?: string; toId?: string }) => {
 		const { originalIdsToSimpleIds, simpleIdsToOriginalIds, nextSimpleId } = this
 
 		if (!originalIdsToSimpleIds.has(obj.id)) {
-			originalIdsToSimpleIds.set(obj.id, `${nextSimpleId}`)
-			simpleIdsToOriginalIds.set(`${nextSimpleId}`, obj.id)
 			const tId = `${nextSimpleId}`
+			simpleIdsToOriginalIds.set(tId, obj.id)
+			originalIdsToSimpleIds.set(obj.id, tId)
 			this.nextSimpleId++
-			return { ...obj, id: tId }
+			obj.id = tId
 		}
-		return obj
+
+		if (obj.fromId && !originalIdsToSimpleIds.has(obj.fromId)) {
+			const tId = `${nextSimpleId}`
+			simpleIdsToOriginalIds.set(tId, obj.id)
+			originalIdsToSimpleIds.set(obj.id, tId)
+			this.nextSimpleId++
+			obj.fromId = tId
+		}
+
+		if (obj.toId && !originalIdsToSimpleIds.has(obj.toId)) {
+			const tId = `${nextSimpleId}`
+			simpleIdsToOriginalIds.set(tId, obj.id)
+			originalIdsToSimpleIds.set(obj.id, tId)
+			this.nextSimpleId++
+			obj.fromId = tId
+		}
 	}
 
-	private writeOriginalIds = (obj: { id: string }) => {
+	private writeOriginalIds = (obj: { id: string; fromId?: string; toId?: string }) => {
 		const { simpleIdsToOriginalIds } = this
 		const id = simpleIdsToOriginalIds.get(obj.id)
 		if (id) {
-			return { ...obj, id }
+			obj = { ...obj, id }
+		}
+		const fromId = simpleIdsToOriginalIds.get(obj.fromId)
+		if (fromId) {
+			obj = { ...obj, fromId }
+		}
+		const toId = simpleIdsToOriginalIds.get(obj.toId)
+		if (toId) {
+			obj = { ...obj, toId }
 		}
 		return obj
 	}

@@ -8,8 +8,8 @@ import {
 	SchemaType,
 	SingleRequestOptions,
 } from '@google/generative-ai'
-import { TLAiPrompt } from '../../shared/types'
-import { Environment } from '../types'
+import { TLAiPrompt } from '../../../shared/types'
+import { Environment } from '../../types'
 import { SYSTEM_INSTRUCTION } from './prompt'
 
 const IS_GEMINI_2 = true
@@ -51,12 +51,49 @@ const commandsSchema: ResponseSchema = {
 					type: {
 						type: SchemaType.STRING,
 						description: 'The type of change to make.',
-						enum: ['createShape', 'updateShape', 'deleteShape'],
+						enum: [
+							'createShape',
+							'updateShape',
+							'deleteShape',
+							'createBinding',
+							'updateBinding',
+							'deleteBinding',
+						],
 					},
 					description: {
 						type: SchemaType.STRING,
 						description:
 							'The description of the shape, its role or function in the drawing; an answer to the question, "what is this shape for?".',
+					},
+					fromId: {
+						type: SchemaType.STRING,
+						description: 'The id of the shape that the binding is from.',
+					},
+					toId: {
+						type: SchemaType.STRING,
+						description: 'The id of the shape that the binding is to.',
+					},
+					binding: {
+						type: SchemaType.OBJECT,
+						description: 'The binding to create.',
+						properties: {
+							id: {
+								type: SchemaType.STRING,
+								description: 'The id of the binding.',
+							},
+							type: {
+								type: SchemaType.STRING,
+								description:
+									'The type of the binding. Refer to the `default binding props` in the prompt for a list of which bindings are valid.',
+								enum: ['arrow'],
+							},
+							props: {
+								type: SchemaType.STRING,
+								description:
+									'The properties of the binding as stringified JSON. We will use JSON.parse to parse it. Refer to the `default binding props` in the prompt for an idea about what props are valid and what their defaults are. You only need to provide props that are different from the defaults; the defaults will be used for all props not provided here.',
+							},
+						},
+						required: ['id', 'type'],
 					},
 					shape: {
 						type: SchemaType.OBJECT,
@@ -68,8 +105,9 @@ const commandsSchema: ResponseSchema = {
 							},
 							type: {
 								type: SchemaType.STRING,
-								description: 'The type of the shape.',
-								enum: ['geo'],
+								description:
+									'The type of the shape. Refer to the `default shape props` in the prompt for a list of which shapes are valid.',
+								enum: ['geo', 'text', 'line', 'arrow', 'frame', 'draw'],
 							},
 							x: {
 								type: SchemaType.NUMBER,
@@ -80,37 +118,15 @@ const commandsSchema: ResponseSchema = {
 								description: 'The y position of the shape as an integer.',
 							},
 							props: {
-								type: SchemaType.OBJECT,
-								properties: {
-									w: {
-										type: SchemaType.NUMBER,
-										description: 'The width of the shape as an integer.',
-									},
-									h: {
-										type: SchemaType.NUMBER,
-										description: 'The height of the shape as an integer.',
-									},
-									color: {
-										type: SchemaType.STRING,
-										description: 'The color of the shape as an integer.',
-										enum: ['red', 'blue', 'green', 'black'],
-									},
-									fill: {
-										type: SchemaType.STRING,
-										description: 'The fill of the shape.',
-										enum: ['none', 'solid', 'fill', 'pattern'],
-									},
-									text: {
-										type: SchemaType.STRING,
-										description: 'The text to display inside of the shape.',
-									},
-								},
+								type: SchemaType.STRING,
+								description:
+									'The properties of the shape as stringified JSON. We will use JSON.parse to parse it. Refer to the `default shape props` in the prompt for an idea about what props are valid and what their defaults are. You only need to provide props that are different from the defaults; the defaults will be used for all props not provided here.',
 							},
 						},
 						required: ['id', 'type'],
 					},
 				},
-				required: ['type', 'shape', 'description'],
+				required: ['type', 'description'],
 			},
 		},
 	},
@@ -157,8 +173,6 @@ export async function promptGoogleModel(model: GoogleModel, prompt: TLAiPrompt) 
 	// delete safePrompt.defaultShapeProps
 	// delete safePrompt.promptBounds
 	// delete safePrompt.contextBounds
-
-	console.log(safePrompt)
 
 	return await model
 		.generateContent([JSON.stringify(prompt), ...imageParts])

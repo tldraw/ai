@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { TLAiChange, TLAiPrompt } from '../../shared/types'
+import { TLAiChange, TLAiPrompt, TLAiSerializedPrompt } from '../../shared/types'
 import { useTldrawAi } from '../ai/useTldrawAi'
 import { ShapeDescriptions } from './transforms/ShapeDescriptions'
 import { SimpleCoordinates } from './transforms/SimpleCoordinates'
@@ -20,9 +20,15 @@ export function useTldrawAiDemo() {
 				if (ai) {
 					const { prompt, handleChange } = await ai.generate(message)
 
-					console.log(prompt)
+					const serializedPrompt: TLAiSerializedPrompt = {
+						...prompt,
+						promptBounds: prompt.promptBounds.toJson(),
+						contextBounds: prompt.contextBounds.toJson(),
+					}
 
-					const changes = await getChangesFromBackend(prompt, signal).catch((error) => {
+					console.log(serializedPrompt)
+
+					const changes = await getChangesFromBackend(serializedPrompt, signal).catch((error) => {
 						if (error.name === 'AbortError') {
 							console.error('Cancelled')
 						} else {
@@ -55,7 +61,7 @@ export function useTldrawAiDemo() {
 }
 
 async function getChangesFromBackend(
-	prompt: TLAiPrompt,
+	prompt: TLAiSerializedPrompt,
 	signal: AbortSignal
 ): Promise<TLAiChange[]> {
 	const res = await fetch(`${process.env.VITE_AI_SERVER_URL}/generate`, {

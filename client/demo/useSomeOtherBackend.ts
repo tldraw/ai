@@ -1,9 +1,9 @@
 import { useCallback } from 'react'
-import { SimpleIds } from './transforms/SimpleIds'
+import { TLAiChange, TLAiPrompt, TLAiSerializedPrompt } from '../../shared/types'
+import { useTldrawAi } from '../ai/useTldrawAi'
 import { ShapeDescriptions } from './transforms/ShapeDescriptions'
 import { SimpleCoordinates } from './transforms/SimpleCoordinates'
-import { TLAiPrompt, TLAiChange } from '../../shared/types'
-import { useTldrawAi } from '../ai/useTldrawAi'
+import { SimpleIds } from './transforms/SimpleIds'
 
 export function useSomeOtherBackend() {
 	const ai = useTldrawAi({
@@ -31,8 +31,6 @@ export function useSomeOtherBackend() {
 
 // Your implementation here...
 
-async function getChangesFromBackend(
-	prompt: TLAiPrompt
-): Promise<TLAiChange[]> {
+async function getChangesFromBackend(prompt: TLAiSerializedPrompt): Promise<TLAiChange[]> {
 	return []
 }

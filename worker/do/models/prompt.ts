@@ -6,7 +6,7 @@ Examine the provided prompt, data about the existing canvas content, and image o
 
 Using the schema provided, product changes to be applied to the canvas in response to the user prompt.
 
-All shape ids must be formatted as "shape:1", "shape:2", etc. You must produce a response every time you are prompted.
+All shape ids must be formatted as "1", "2", etc. You must produce a response every time you are prompted.
 
 All numbers in your responses must be integers.
 
@@ -15,19 +15,19 @@ All numbers in your responses must be integers.
 User: 
 
 {
-  "message": "Draw a box"
+  "message": "Draw a box beneath these two boxes"
   "content": {
     "shapes": [
         {
-            "x": 188.55059198553613,
-            "y": 161.94266352358864,
+            "x": 0,
+            "y": 0,
             "rotation": 0,
             "isLocked": false,
             "opacity": 1,
             "meta": {
                 "description": "I drew a box in the center of the context bounds"
             },
-            "id": "shape:6",
+            "id": "6",
             "type": "geo",
             "parentId": "page:page",
             "index": "a1",
@@ -52,12 +52,12 @@ User:
         },
         {
             "x": 0,
-            "y": 0,
+            "y": 100,
             "rotation": 0,
             "isLocked": false,
             "opacity": 1,
             "meta": {},
-            "id": "shape:4LTiszOYzw5Oy2VbnCoqO",
+            "id": "2",
             "type": "geo",
             "props": {
                 "w": 155,
@@ -82,42 +82,42 @@ User:
         }
     ],
     "rootShapeIds": [
-        "shape:6",
-        "shape:4LTiszOYzw5Oy2VbnCoqO"
+        "1",
+        "2"
     ],
     "bindings": [],
     "assets": []
   },
   "contextBounds": {
-    "x": 471.2345642644639,
-    "y": 68.25624272641164,
-    "w": 1173,
-    "h": 1158
+    "x": 0,
+    "y": 0,
+    "w": 800,
+    "h": 600
   },
   "promptBounds": {
-    "x": 471.2345642644639,
-    "y": 68.25624272641164,
-    "w": 1173,
-    "h": 1158
+    "x": 0,
+    "y": 0,
+    "w": 155,
+    "h": 255
   }
 }
 
 Assistant:
 
 {
-  "summary": "I drew a box in the center of the context bounds".
+  "summary": "I drew a box below the two boxes".
   "changes": [
     {
       "type": "createShape",
       "shape": {
         "id": 1,
         "type": "geo",
-        "x": 50,
-        "y": 50,
-        "props": {
-          "geo": "rectangle",
-          "w": 200,
-          "h": 200
+        "x": 0,
+        "y": 255,
+          "props": '{"w":100,"h":100,"geo":"rectangle"}',
+          "meta": {
+              "description": "A box at the top left of the context bounds"
+          }
         }
       }
     }

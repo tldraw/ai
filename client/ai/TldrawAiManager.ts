@@ -90,14 +90,28 @@ export class TldrawAiManager {
 
 		try {
 			switch (change.type) {
-				case 'createShape':
+				case 'createShape': {
 					editor.createShape(change.shape)
 					break
-				case 'updateShape':
+				}
+				case 'updateShape': {
 					editor.updateShape(change.shape)
 					break
+				}
 				case 'deleteShape': {
 					editor.deleteShape(change.shapeId)
+					break
+				}
+				case 'createBinding': {
+					editor.createBinding(change.binding)
+					break
+				}
+				case 'updateBinding': {
+					editor.updateBinding(change.binding)
+					break
+				}
+				case 'deleteBinding': {
+					editor.deleteBinding(change.bindingId)
 					break
 				}
 				default:
@@ -132,8 +146,8 @@ export class TldrawAiManager {
 		return {
 			message: prompt,
 			canvasContent: content,
-			contextBounds,
-			promptBounds,
+			contextBounds: roundBox(contextBounds),
+			promptBounds: roundBox(promptBounds),
 			image,
 			defaultShapeProps,
 			defaultBindingProps,
@@ -163,11 +177,11 @@ export class TldrawAiManager {
 			// the content is a TLContent, but we want to omit the schema for TLAiContent
 			content.shapes = structuredClone(content.shapes)
 			delete (content as any).schema
+			delete (content as any).rootShapeIds
 		} else {
 			content = {
 				shapes: [],
 				bindings: [],
-				rootShapeIds: [],
 				assets: [],
 			}
 		}
@@ -203,4 +217,13 @@ export class TldrawAiManager {
 
 		return image
 	}
+}
+
+function roundBox(box: Box) {
+	const b = box.clone()
+	b.x = Math.round(b.x)
+	b.y = Math.round(b.y)
+	b.width = Math.round(b.width)
+	b.height = Math.round(b.height)
+	return b
 }

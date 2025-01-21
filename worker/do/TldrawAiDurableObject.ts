@@ -1,9 +1,9 @@
 import { DurableObjectState } from '@cloudflare/workers-types'
 import { GenerativeModel } from '@google/generative-ai'
 import { AutoRouter, error } from 'itty-router'
-import { TLAiPrompt } from '../shared/types'
+import { TLAiPrompt } from '../../shared/types'
+import { Environment } from '../types'
 import { getGoogleApiKey, getGoogleModel, promptGoogleModel } from './models/google'
-import { Environment } from './types'
 
 export class TldrawAiDurableObject {
 	googleModel: GenerativeModel
@@ -25,7 +25,7 @@ export class TldrawAiDurableObject {
 	})
 		// when we get a connection request, we stash the room id if needed and handle the connection
 		.post('/generate', (request) => this.generate(request))
-		.post('/stream', (request) => this.stream(request))
+		.post('/stream', (request) => this.stream(request)) // todo: fully implement this
 
 	// `fetch` is the entry point for all requests to the Durable Object
 	fetch(request: Request): Response | Promise<Response> {
@@ -50,8 +50,19 @@ export class TldrawAiDurableObject {
 			const response = JSON.parse(res as string)
 			console.error('AI response:', response)
 
+			for (const change of response.changes) {
+				if (change.shape?.props) {
+					change.shape.props = JSON.parse(change.shape.props)
+				}
+				if (change.binding?.props) {
+					change.binding.props = JSON.parse(change.binding.props)
+				}
+			}
+
+			const finalResponse = JSON.stringify(response)
+
 			// Send back the response as a JSON object
-			return new Response(res, {
+			return new Response(finalResponse, {
 				headers: { 'Content-Type': 'application/json' },
 			})
 		} catch (error: any) {

@@ -1,4 +1,4 @@
-import { Box, isPageId } from 'tldraw'
+import { isPageId } from 'tldraw'
 import { TLAiChange, TLAiPrompt } from '../../../shared/types'
 import { TldrawAiTransform } from '../../ai/TldrawAiTransform'
 
@@ -10,28 +10,35 @@ export class SimpleCoordinates extends TldrawAiTransform {
 	transformPrompt = (input: TLAiPrompt) => {
 		const { editor } = this
 
-		const bounds = Box.Common(
-			input.canvasContent.shapes.map((s) => editor.getShapePageBounds(s.id)!)
-		)
+		const { promptBounds, canvasContent } = input
 
-		this.offset.x = bounds.x
-		this.offset.y = bounds.y
-
-		for (const s of input.canvasContent.shapes) {
+		for (const s of canvasContent.shapes) {
 			for (const prop of ['x', 'y'] as const) {
+				s[prop] = Math.floor(s[prop])
 				this.adjustments[s.id + '_' + prop] = s[prop]
 			}
 			for (const key in s.props) {
 				// @ts-expect-error
 				const val = s.props[key]
 				if (Number.isFinite(val)) {
+					;(s.props as any)[key] = Math.floor(val)
 					this.adjustments[s.id + '_' + key] = val
 					;(s.props as any)[key] = Math.floor(val)
 				}
 			}
 		}
 
-		input.canvasContent.shapes = input.canvasContent.shapes.map((s) => {
+		// Bounds of the shapes
+		// if (canvasContent.shapes.length) {
+		// 	const bounds = Box.Common(canvasContent.shapes.map((s) => editor.getShapePageBounds(s.id)!))
+		// 	this.offset.x = bounds.x - promptBounds.x
+		// 	this.offset.y = bounds.y - promptBounds.y
+		// } else {
+		// 	this.offset.x = promptBounds.x
+		// 	this.offset.y = promptBounds.y
+		// }
+
+		canvasContent.shapes = canvasContent.shapes.map((s) => {
 			if (isPageId(s.parentId)) {
 				this.offsetIds.add(s.id)
 				return {
@@ -50,7 +57,18 @@ export class SimpleCoordinates extends TldrawAiTransform {
 	transformChange = (change: TLAiChange) => {
 		const { offsetIds } = this
 		switch (change.type) {
-			case 'createShape':
+			case 'createShape': {
+				const { shape } = change
+				shape.x ??= 0
+				shape.y ??= 0
+				shape.x += this.offset.x
+				shape.y += this.offset.y
+
+				return {
+					...change,
+					shape,
+				}
+			}
 			case 'updateShape': {
 				const { shape } = change
 				if (offsetIds.has(shape.id)) {

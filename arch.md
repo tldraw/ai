@@ -12,8 +12,10 @@ The steps are:
 - prepare the input
 - send the input to an LLM
 - (ai magic here)
-- prepare each change that comes back from the LLM
+- prepare the response
 - apply each change
+
+For streaming, we would need to prepare each change as it is returned from the model.
 
 ## Preparations
 
