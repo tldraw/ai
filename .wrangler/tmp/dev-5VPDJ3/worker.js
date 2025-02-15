@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// .wrangler/tmp/bundle-DcJQhW/checked-fetch.js
+// .wrangler/tmp/bundle-g9TFe7/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -6733,7 +6733,6 @@ async function promptGoogleModel(model, prompt) {
       }
     });
   }
-  const safePrompt = { ...prompt };
   return await model.generateContent([JSON.stringify(prompt), ...imageParts]).then((r2) => r2.response.text());
 }
 __name(promptGoogleModel, "promptGoogleModel");
@@ -12132,7 +12131,7 @@ function zodResponseFormat(zodObject, name, props) {
 __name(zodResponseFormat, "zodResponseFormat");
 
 // worker/do/models/openai_schema.ts
-var IColor = z.enum([
+var SimpleColor = z.enum([
   "red",
   "light-red",
   "green",
@@ -12143,149 +12142,100 @@ var IColor = z.enum([
   "yellow",
   "black",
   "violet",
-  "grey"
-  // 'white',
+  "light-violet",
+  "grey",
+  "white"
 ]);
-var IFill = z.enum(["none", "solid", "fill"]);
-var ILabel = z.string();
-var IRectangleShape = z.object({
+var SimpleFill = z.enum(["none", "solid", "semi", "fill", "pattern"]);
+var SimpleLabel = z.string();
+var SimpleRectangleShape = z.object({
   type: z.literal("rectangle"),
   shapeId: z.string(),
   x: z.number(),
   y: z.number(),
   width: z.number(),
   height: z.number(),
-  color: IColor.optional(),
-  fill: IFill.optional(),
-  text: ILabel.optional()
+  color: SimpleColor.optional(),
+  fill: SimpleFill.optional(),
+  text: SimpleLabel.optional()
 });
-var IEllipseShape = z.object({
+var SimpleEllipseShape = z.object({
   type: z.literal("ellipse"),
   shapeId: z.string(),
   x: z.number(),
   y: z.number(),
   width: z.number(),
   height: z.number(),
-  color: IColor.optional(),
-  fill: IFill.optional(),
-  text: ILabel.optional()
+  color: SimpleColor.optional(),
+  fill: SimpleFill.optional(),
+  text: SimpleLabel.optional()
 });
-var ILineShape = z.object({
+var SimpleLineShape = z.object({
   type: z.literal("line"),
   shapeId: z.string(),
   x1: z.number(),
   y1: z.number(),
   x2: z.number(),
   y2: z.number(),
-  color: IColor.optional()
+  color: SimpleColor.optional()
 });
-var ITextShape = z.object({
+var SimpleTextShape = z.object({
   type: z.literal("text"),
   shapeId: z.string(),
   x: z.number(),
   y: z.number(),
-  color: IColor.optional(),
+  color: SimpleColor.optional(),
   text: z.string().optional(),
   textAlign: z.enum(["start", "middle", "end"]).optional()
 });
-var IShape = z.union([IRectangleShape, IEllipseShape, ILineShape, ITextShape]);
-var ICreateEvent = z.object({
+var SimpleShape = z.union([
+  SimpleRectangleShape,
+  SimpleEllipseShape,
+  SimpleLineShape,
+  SimpleTextShape
+]);
+var SimpleCreateEvent = z.object({
   type: z.literal("create"),
-  shape: IShape,
+  shape: SimpleShape,
   intent: z.string()
 });
-var IMoveEvent = z.object({
+var SimpleMoveEvent = z.object({
   type: z.literal("move"),
   shapeId: z.string(),
   x: z.number(),
   y: z.number(),
   intent: z.string()
 });
-var ILabelEvent = z.object({
+var SimpleLabelEvent = z.object({
   type: z.literal("label"),
   shapeId: z.string(),
   text: z.string(),
   intent: z.string()
 });
-var IDeleteEvent = z.object({
+var SimpleDeleteEvent = z.object({
   type: z.literal("delete"),
   shapeId: z.string(),
   intent: z.string()
 });
-var IThinkEvent = z.object({
+var SimpleThinkEvent = z.object({
   type: z.literal("think"),
   text: z.string(),
   intent: z.string()
 });
+var SimpleEvent = z.union([
+  SimpleThinkEvent,
+  SimpleCreateEvent,
+  SimpleMoveEvent,
+  SimpleLabelEvent,
+  SimpleDeleteEvent
+]);
 var ModelResponse = z.object({
   long_description_of_strategy: z.string(),
-  events: z.array(z.union([IThinkEvent, ICreateEvent, IMoveEvent, ILabelEvent, IDeleteEvent]))
+  events: z.array(SimpleEvent)
 });
-var OPENAI_SYSTEM_PROMPT = `
-Here\u2019s a system prompt you can use to guide your model in generating responses that conform to your Zod schema:
-
----
-
-## System Prompt:
-
-You are an AI assistant that responds with structured JSON data based on a predefined schema. Your responses must always conform to the following Zod schema:
-
-### Schema Overview
-
-You are interacting with a system that models shapes (rectangles, ellipses, text) and tracks events (creating, moving, labeling, deleting, or thinking). Your responses should include:
-- **A long description of your strategy** (\`long_description_of_strategy\`): Explain your reasoning in plain text.
-- **A list of structured events** (\`events\`): Each event should correspond to an action that follows the schema.
-
-### Shape Schema
-
-Shapes can be:
-- **Rectangle (\`rectangle\`)**
-- **Ellipse (\`ellipse\`)**
-- **Text (\`text\`)**
-
-Each shape has:
-- \`x\`, \`y\` (numbers, coordinates)
-- \`width\` and \`height\` (for rectangles and ellipses)
-- \`color\` (optional, chosen from predefined colors)
-- \`fill\` (optional, for rectangles and ellipses)
-- \`text\` (optional, for text elements)
-- \`textAlign\` (optional, for text elements)
-
-### Event Schema
-
-Events include:
-- **Think (\`think\`)**: The AI describes its intent or reasoning.
-- **Create (\`create\`)**: The AI creates a new shape.
-- **Move (\`move\`)**: The AI moves a shape to a new position.
-- **Label (\`label\`)**: The AI changes a shape's text.
-- **Delete (\`delete\`)**: The AI removes a shape.
-
-Each event must include:
-- A \`type\` (one of \`think\`, \`create\`, \`move\`, \`label\`, \`delete\`)
-- A \`shapeId\` (if applicable)
-- An \`intent\` (descriptive reason for the action)
-
-### Rules
-
-1. **Always return a valid JSON object conforming to the schema.**
-2. **Do not generate extra fields or omit required fields.**
-3. **Provide clear and logical reasoning in \`long_description_of_strategy\`.**
-4. **Ensure each \`shapeId\` is unique and consistent across related events.**
-5. **Use meaningful \`intent\` descriptions for all actions.**
-
-## Useful notes
-
-- Text shapes are 32 points tall.
-
----
-
-This prompt ensures your model understands the structure and logic behind the schema while maintaining valid and structured responses. Let me know if you want any refinements! \u{1F680}
-`;
 
 // worker/do/models/openai.ts
 async function promptOpenaiModel(model, prompt) {
-  delete prompt.defaultShapeProps;
-  delete prompt.defaultBindingProps;
   const userMessage = {
     role: "user",
     content: []
@@ -12332,19 +12282,6 @@ ${JSON.stringify(simplifiedCanvasContent).replaceAll("\n", " ")}`
   } else {
     userMessage.content.push({ type: "text", text: `The user's prompt is: ${prompt.message}` });
   }
-  console.log(
-    JSON.stringify(
-      [
-        {
-          role: "system",
-          content: OPENAI_SYSTEM_PROMPT
-        },
-        userMessage
-      ],
-      null,
-      2
-    )
-  );
   return await model.beta.chat.completions.parse({
     model: "gpt-4o-2024-08-06",
     messages: [
@@ -12360,51 +12297,115 @@ ${JSON.stringify(simplifiedCanvasContent).replaceAll("\n", " ")}`
 __name(promptOpenaiModel, "promptOpenaiModel");
 function canvasContentToSimpleContent(content) {
   return {
-    shapes: content.shapes.map((shape) => {
-      let s2;
-      if (shape.type === "text") {
-        s2 = shape;
-        return {
-          id: s2.id,
-          type: "text",
-          text: s2.props.text,
-          x: s2.x,
-          y: s2.y,
-          color: s2.props.color
-        };
-      }
-      if (shape.type === "geo") {
-        s2 = shape;
-        if (s2.props.geo === "rectangle" || s2.props.geo === "ellipse") {
+    shapes: compact(
+      content.shapes.map((shape) => {
+        let s2;
+        if (shape.type === "text") {
+          s2 = shape;
           return {
-            id: s2.id,
-            type: s2.props.geo,
+            shapeId: s2.id,
+            type: "text",
+            text: s2.props.text,
             x: s2.x,
             y: s2.y,
-            width: s2.props.w,
-            height: s2.props.h,
             color: s2.props.color,
-            fill: s2.props.fill,
-            text: s2.props.text
+            textAlign: s2.props.textAlign
           };
         }
-      }
-      if (shape.type === "line") {
-        s2 = shape;
-        return {
-          id: s2.id,
-          type: "line",
-          x1: s2.props.points[0].x + s2.x,
-          y1: s2.props.points[0].y + s2.y,
-          x2: s2.props.points[1].x + s2.x,
-          y2: s2.props.points[1].y + s2.y,
-          color: s2.props.color
-        };
-      }
-    }).filter(Boolean)
+        if (shape.type === "geo") {
+          s2 = shape;
+          if (s2.props.geo === "rectangle" || s2.props.geo === "ellipse") {
+            return {
+              shapeId: s2.id,
+              type: s2.props.geo,
+              x: s2.x,
+              y: s2.y,
+              width: s2.props.w,
+              height: s2.props.h,
+              color: s2.props.color,
+              fill: s2.props.fill,
+              text: s2.props.text
+            };
+          }
+        }
+        if (shape.type === "line") {
+          s2 = shape;
+          const points = Object.values(s2.props.points).sort(
+            (a2, b) => a2.index.localeCompare(b.index)
+          );
+          return {
+            shapeId: s2.id,
+            type: "line",
+            x1: points[0].x + s2.x,
+            y1: points[0].y + s2.y,
+            x2: points[1].x + s2.x,
+            y2: points[1].y + s2.y,
+            color: s2.props.color
+          };
+        }
+      })
+    )
   };
 }
 __name(canvasContentToSimpleContent, "canvasContentToSimpleContent");
+function simpleShapeToCanvasShape(shape) {
+  if (shape.type === "text") {
+    return {
+      type: "text",
+      x: shape.x,
+      y: shape.y - 12,
+      props: {
+        text: shape.text,
+        color: shape.color ?? "black",
+        textAlign: shape.textAlign ?? "middle"
+      }
+    };
+  } else if (shape.type === "line") {
+    const minX = Math.min(shape.x1, shape.x2);
+    const minY = Math.min(shape.y1, shape.y2);
+    return {
+      type: "line",
+      x: minX,
+      y: minY,
+      props: {
+        points: {
+          a1: {
+            id: "a1",
+            index: "a2",
+            x: shape.x1 - minX,
+            y: shape.y1 - minY
+          },
+          a2: {
+            id: "a2",
+            index: "a2",
+            x: shape.x2 - minX,
+            y: shape.y2 - minY
+          }
+        },
+        color: shape.color ?? "black"
+      }
+    };
+  } else {
+    return {
+      type: "geo",
+      x: shape.x,
+      y: shape.y,
+      props: {
+        geo: shape.type,
+        w: shape.width,
+        h: shape.height,
+        color: shape.color ?? "black",
+        fill: shape.fill ?? "none",
+        text: shape.text ?? ""
+      }
+    };
+  }
+}
+__name(simpleShapeToCanvasShape, "simpleShapeToCanvasShape");
+function compact(arr) {
+  return arr.filter(Boolean);
+}
+__name(compact, "compact");
 
 // worker/do/TldrawAiDurableObject.ts
 var TldrawAiDurableObject = class {
@@ -12453,58 +12454,10 @@ var TldrawAiDurableObject = class {
           for (const event of response.events) {
             switch (event.type) {
               case "create": {
-                let shape;
-                if (event.shape.type === "text") {
-                  shape = {
-                    type: "text",
-                    x: event.shape.x,
-                    y: event.shape.y - 12,
-                    props: {
-                      text: event.shape.text,
-                      color: event.shape.color ?? "black",
-                      textAlign: event.shape.textAlign ?? "middle"
-                    }
-                  };
-                } else if (event.shape.type === "line") {
-                  const minX = Math.min(event.shape.x1, event.shape.x2);
-                  const minY = Math.min(event.shape.y1, event.shape.y2);
-                  shape = {
-                    type: "line",
-                    x: minX,
-                    y: minY,
-                    props: {
-                      points: [
-                        {
-                          x: event.shape.x1 - minX,
-                          y: event.shape.y1 - minY
-                        },
-                        {
-                          x: event.shape.x2 - minX,
-                          y: event.shape.y2 - minY
-                        }
-                      ],
-                      color: event.shape.color ?? "black"
-                    }
-                  };
-                } else {
-                  shape = {
-                    type: "geo",
-                    x: event.shape.x,
-                    y: event.shape.y,
-                    props: {
-                      geo: event.shape.type,
-                      w: event.shape.width,
-                      h: event.shape.height,
-                      color: event.shape.color ?? "black",
-                      fill: event.shape.fill ?? "none",
-                      text: event.shape.text ?? ""
-                    }
-                  };
-                }
                 const change = {
                   type: "createShape",
                   description: event.intent ?? "",
-                  shape
+                  shape: simpleShapeToCanvasShape(event.shape)
                 };
                 changes.push(change);
                 break;
@@ -12672,7 +12625,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-DcJQhW/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-g9TFe7/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -12704,7 +12657,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-DcJQhW/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-g9TFe7/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

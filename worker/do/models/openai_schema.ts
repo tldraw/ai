@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-const IColor = z.enum([
+const SimpleColor = z.enum([
 	'red',
 	'light-red',
 	'green',
@@ -11,110 +11,118 @@ const IColor = z.enum([
 	'yellow',
 	'black',
 	'violet',
+	'light-violet',
 	'grey',
-	// 'white',
+	'white',
 ])
-// .describe('The color of the shape')
 
-const IFill = z.enum(['none', 'solid', 'fill']) //.describe('The fill type of the shape')
+const SimpleFill = z.enum(['none', 'solid', 'semi', 'fill', 'pattern']) //.describe('The fill type of the shape')
 
-const ILabel = z.string() //.describe('The text label of the shape')
+const SimpleLabel = z.string() //.describe('The text label of the shape')
 
-export const IRectangleShape = z.object({
+const SimpleRectangleShape = z.object({
 	type: z.literal('rectangle'),
 	shapeId: z.string(),
 	x: z.number(),
 	y: z.number(),
 	width: z.number(),
 	height: z.number(),
-	color: IColor.optional(),
-	fill: IFill.optional(),
-	text: ILabel.optional(),
+	color: SimpleColor.optional(),
+	fill: SimpleFill.optional(),
+	text: SimpleLabel.optional(),
 })
-// .describe('A rectangle shape')
 
-export const IEllipseShape = z.object({
+const SimpleEllipseShape = z.object({
 	type: z.literal('ellipse'),
 	shapeId: z.string(),
 	x: z.number(),
 	y: z.number(),
 	width: z.number(),
 	height: z.number(),
-	color: IColor.optional(),
-	fill: IFill.optional(),
-	text: ILabel.optional(),
+	color: SimpleColor.optional(),
+	fill: SimpleFill.optional(),
+	text: SimpleLabel.optional(),
 })
-// .describe('A circle shape')
 
-export const ILineShape = z.object({
+const SimpleLineShape = z.object({
 	type: z.literal('line'),
 	shapeId: z.string(),
 	x1: z.number(),
 	y1: z.number(),
 	x2: z.number(),
 	y2: z.number(),
-	color: IColor.optional(),
+	color: SimpleColor.optional(),
 })
-// .describe('A line shape')
 
-export const ITextShape = z.object({
+const SimpleTextShape = z.object({
 	type: z.literal('text'),
 	shapeId: z.string(),
 	x: z.number(),
 	y: z.number(),
-	color: IColor.optional(),
+	color: SimpleColor.optional(),
 	text: z.string().optional(),
 	textAlign: z.enum(['start', 'middle', 'end']).optional(),
 })
-// .describe('A circle shape')
 
-export const IShape = z.union([IRectangleShape, IEllipseShape, ILineShape, ITextShape])
+const SimpleShape = z.union([
+	SimpleRectangleShape,
+	SimpleEllipseShape,
+	SimpleLineShape,
+	SimpleTextShape,
+])
 
 // Events
 
-export const ICreateEvent = z.object({
+const SimpleCreateEvent = z.object({
 	type: z.literal('create'),
-	shape: IShape,
+	shape: SimpleShape,
 	intent: z.string(),
 })
-// .describe('An event that created a shape')
 
-export const IMoveEvent = z.object({
+const SimpleMoveEvent = z.object({
 	type: z.literal('move'),
 	shapeId: z.string(),
 	x: z.number(),
 	y: z.number(),
 	intent: z.string(),
 })
-// .describe('An event that moved a shape')
 
-export const ILabelEvent = z.object({
+const SimpleLabelEvent = z.object({
 	type: z.literal('label'),
 	shapeId: z.string(),
 	text: z.string(),
 	intent: z.string(),
 })
-// .describe('An event that labeled a shape')
 
-export const IDeleteEvent = z.object({
+const SimpleDeleteEvent = z.object({
 	type: z.literal('delete'),
 	shapeId: z.string(),
 	intent: z.string(),
 })
-// .describe('An event that deleted a shape')
 
-export const IThinkEvent = z.object({
+const SimpleThinkEvent = z.object({
 	type: z.literal('think'),
 	text: z.string(),
 	intent: z.string(),
 })
-// .describe("A thinking event that captures the assistant's intent or planning")
+
+const SimpleEvent = z.union([
+	SimpleThinkEvent,
+	SimpleCreateEvent,
+	SimpleMoveEvent,
+	SimpleLabelEvent,
+	SimpleDeleteEvent,
+])
+
+export type ISimpleShape = z.infer<typeof SimpleShape>
+
+export type ISimpleEvent = z.infer<typeof SimpleEvent>
 
 // Model response schema
 
 export const ModelResponse = z.object({
 	long_description_of_strategy: z.string(),
-	events: z.array(z.union([IThinkEvent, ICreateEvent, IMoveEvent, ILabelEvent, IDeleteEvent])),
+	events: z.array(SimpleEvent),
 })
 
 export const OPENAI_SYSTEM_PROMPT = `

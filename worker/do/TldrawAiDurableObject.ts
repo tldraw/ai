@@ -5,7 +5,7 @@ import OpenAI from 'openai'
 import { CreateShapeChange, TLAiChange, TLAiPrompt, TLAiSerializedPrompt } from '../../shared/types'
 import { Environment } from '../types'
 import { getGoogleApiKey, getGoogleModel, promptGoogleModel } from './models/google'
-import { promptOpenaiModel } from './models/openai'
+import { promptOpenaiModel, simpleShapeToCanvasShape } from './models/openai'
 
 export class TldrawAiDurableObject {
 	googleModel: GenerativeModel
@@ -69,59 +69,10 @@ export class TldrawAiDurableObject {
 					for (const event of response.events) {
 						switch (event.type) {
 							case 'create': {
-								let shape: CreateShapeChange['shape']
-
-								if (event.shape.type === 'text') {
-									shape = {
-										type: 'text',
-										x: event.shape.x,
-										y: event.shape.y - 12,
-										props: {
-											text: event.shape.text,
-											color: event.shape.color ?? 'black',
-											textAlign: event.shape.textAlign ?? 'middle',
-										},
-									}
-								} else if (event.shape.type === 'line') {
-									const minX = Math.min(event.shape.x1, event.shape.x2)
-									const minY = Math.min(event.shape.y1, event.shape.y2)
-									shape = {
-										type: 'line',
-										x: minX,
-										y: minY,
-										props: {
-											points: [
-												{
-													x: event.shape.x1 - minX,
-													y: event.shape.y1 - minY,
-												},
-												{
-													x: event.shape.x2 - minX,
-													y: event.shape.y2 - minY,
-												},
-											],
-											color: event.shape.color ?? 'black',
-										},
-									}
-								} else {
-									shape = {
-										type: 'geo',
-										x: event.shape.x,
-										y: event.shape.y,
-										props: {
-											geo: event.shape.type,
-											w: event.shape.width,
-											h: event.shape.height,
-											color: event.shape.color ?? 'black',
-											fill: event.shape.fill ?? 'none',
-											text: event.shape.text ?? '',
-										},
-									}
-								}
 								const change: CreateShapeChange = {
 									type: 'createShape',
 									description: event.intent ?? '',
-									shape,
+									shape: simpleShapeToCanvasShape(event.shape),
 								}
 
 								changes.push(change)

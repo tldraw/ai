@@ -4,16 +4,11 @@ import {
 	ChatCompletionContentPart,
 	ChatCompletionUserMessageParam,
 } from 'openai/resources/index.mjs'
-import { TLGeoShape, TLLineShape, TLTextShape } from 'tldraw'
+import { IndexKey, TLGeoShape, TLLineShape, TLShapePartial, TLTextShape } from 'tldraw'
 import { TLAiSerializedPrompt } from '../../../shared/types'
-import { ModelResponse, OPENAI_SYSTEM_PROMPT } from './openai_schema'
+import { ISimpleShape, ModelResponse } from './openai_schema'
 
 export async function promptOpenaiModel(model: OpenAI, prompt: TLAiSerializedPrompt) {
-	// @ts-expect-error
-	delete prompt.defaultShapeProps
-	// @ts-expect-error
-	delete prompt.defaultBindingProps
-
 	const userMessage: ChatCompletionUserMessageParam & {
 		content: Array<ChatCompletionContentPart>
 	} = {
@@ -68,20 +63,6 @@ export async function promptOpenaiModel(model: OpenAI, prompt: TLAiSerializedPro
 		userMessage.content.push({ type: 'text', text: `The user's prompt is: ${prompt.message}` })
 	}
 
-	console.log(
-		JSON.stringify(
-			[
-				{
-					role: 'system',
-					content: OPENAI_SYSTEM_PROMPT,
-				},
-				userMessage,
-			],
-			null,
-			2
-		)
-	)
-
 	return await model.beta.chat.completions.parse({
 		model: 'gpt-4o-2024-08-06',
 		messages: [
@@ -95,20 +76,23 @@ export async function promptOpenaiModel(model: OpenAI, prompt: TLAiSerializedPro
 	})
 }
 
-function canvasContentToSimpleContent(content: TLAiSerializedPrompt['canvasContent']) {
+function canvasContentToSimpleContent(content: TLAiSerializedPrompt['canvasContent']): {
+	shapes: ISimpleShape[]
+} {
 	return {
-		shapes: content.shapes
-			.map((shape) => {
+		shapes: compact(
+			content.shapes.map((shape) => {
 				let s
 				if (shape.type === 'text') {
 					s = shape as TLTextShape
 					return {
-						id: s.id,
+						shapeId: s.id,
 						type: 'text',
 						text: s.props.text,
 						x: s.x,
 						y: s.y,
 						color: s.props.color,
+						textAlign: s.props.textAlign,
 					}
 				}
 
@@ -116,7 +100,7 @@ function canvasContentToSimpleContent(content: TLAiSerializedPrompt['canvasConte
 					s = shape as TLGeoShape
 					if (s.props.geo === 'rectangle' || s.props.geo === 'ellipse') {
 						return {
-							id: s.id,
+							shapeId: s.id,
 							type: s.props.geo,
 							x: s.x,
 							y: s.y,
@@ -131,17 +115,78 @@ function canvasContentToSimpleContent(content: TLAiSerializedPrompt['canvasConte
 
 				if (shape.type === 'line') {
 					s = shape as TLLineShape
+					const points = Object.values(s.props.points).sort((a, b) =>
+						a.index.localeCompare(b.index)
+					)
 					return {
-						id: s.id,
+						shapeId: s.id,
 						type: 'line',
-						x1: s.props.points[0].x + s.x,
-						y1: s.props.points[0].y + s.y,
-						x2: s.props.points[1].x + s.x,
-						y2: s.props.points[1].y + s.y,
+						x1: points[0].x + s.x,
+						y1: points[0].y + s.y,
+						x2: points[1].x + s.x,
+						y2: points[1].y + s.y,
 						color: s.props.color,
 					}
 				}
 			})
-			.filter(Boolean),
+		),
 	}
+}
+
+export function simpleShapeToCanvasShape(shape: ISimpleShape): Omit<TLShapePartial, 'id'> {
+	if (shape.type === 'text') {
+		return {
+			type: 'text',
+			x: shape.x,
+			y: shape.y - 12,
+			props: {
+				text: shape.text,
+				color: shape.color ?? 'black',
+				textAlign: shape.textAlign ?? 'middle',
+			},
+		}
+	} else if (shape.type === 'line') {
+		const minX = Math.min(shape.x1, shape.x2)
+		const minY = Math.min(shape.y1, shape.y2)
+		return {
+			type: 'line',
+			x: minX,
+			y: minY,
+			props: {
+				points: {
+					a1: {
+						id: 'a1',
+						index: 'a2' as IndexKey,
+						x: shape.x1 - minX,
+						y: shape.y1 - minY,
+					},
+					a2: {
+						id: 'a2',
+						index: 'a2' as IndexKey,
+						x: shape.x2 - minX,
+						y: shape.y2 - minY,
+					},
+				},
+				color: shape.color ?? 'black',
+			},
+		}
+	} else {
+		return {
+			type: 'geo',
+			x: shape.x,
+			y: shape.y,
+			props: {
+				geo: shape.type,
+				w: shape.width,
+				h: shape.height,
+				color: shape.color ?? 'black',
+				fill: shape.fill ?? 'none',
+				text: shape.text ?? '',
+			},
+		}
+	}
+}
+
+function compact<T>(arr: T[]): Exclude<T, undefined>[] {
+	return arr.filter(Boolean) as Exclude<T, undefined>[]
 }

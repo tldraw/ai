@@ -168,12 +168,6 @@ export async function promptGoogleModel(model: GoogleModel, prompt: TLAiSerializ
 		})
 	}
 
-	const safePrompt = { ...prompt }
-	// delete safePrompt.defaultBindingProps
-	// delete safePrompt.defaultShapeProps
-	// delete safePrompt.promptBounds
-	// delete safePrompt.contextBounds
-
 	return await model
 		.generateContent([JSON.stringify(prompt), ...imageParts])
 		.then((r) => r.response.text())

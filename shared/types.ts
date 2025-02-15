@@ -4,9 +4,7 @@ import {
 	TLBindingId,
 	TLBindingUpdate,
 	type Box,
-	type TLBinding,
 	type TLContent,
-	type TLShape,
 	type TLShapeId,
 	type TLShapePartial,
 } from 'tldraw'
@@ -30,10 +28,6 @@ export interface TLAiPrompt {
 	message: string | TLAiMessage[]
 	// A screenshot
 	image?: string
-	// A mapping of shape type to shape props
-	defaultShapeProps: Record<TLShape['type'], TLShape['props']>
-	// A mapping of binding type to binding props
-	defaultBindingProps: Record<TLBinding['type'], TLBinding['props']>
 	// The content pulled from the editor
 	canvasContent: TLAiContent
 	// The bounds of the context in the editor
@@ -47,10 +41,6 @@ export interface TLAiSerializedPrompt {
 	message: string | TLAiMessage[]
 	// A screenshot
 	image?: string
-	// A mapping of shape type to shape props
-	defaultShapeProps: Record<TLShape['type'], TLShape['props']>
-	// A mapping of binding type to binding props
-	defaultBindingProps: Record<TLBinding['type'], TLBinding['props']>
 	// The content pulled from the editor
 	canvasContent: TLAiContent
 	// The bounds of the context in the editor
