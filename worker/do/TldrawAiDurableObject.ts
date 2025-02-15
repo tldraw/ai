@@ -1,20 +1,27 @@
 import { DurableObjectState } from '@cloudflare/workers-types'
 import { GenerativeModel } from '@google/generative-ai'
 import { AutoRouter, error } from 'itty-router'
-import { TLAiPrompt } from '../../shared/types'
+import OpenAI from 'openai'
+import { CreateShapeChange, TLAiChange, TLAiPrompt, TLAiSerializedPrompt } from '../../shared/types'
 import { Environment } from '../types'
 import { getGoogleApiKey, getGoogleModel, promptGoogleModel } from './models/google'
+import { promptOpenaiModel } from './models/openai'
 
 export class TldrawAiDurableObject {
 	googleModel: GenerativeModel
+	openaiModel: OpenAI
+
+	provider = 'openai'
 
 	constructor(
 		private readonly _ctx: DurableObjectState,
 		public env: Environment
 	) {
 		const apiKey = getGoogleApiKey(this.env)
-		const model = getGoogleModel(apiKey)
-		this.googleModel = model
+		this.googleModel = getGoogleModel(apiKey)
+		this.openaiModel = new OpenAI({
+			apiKey: env.OPENAI_API_KEY,
+		})
 	}
 
 	private readonly router = AutoRouter({
@@ -39,30 +46,166 @@ export class TldrawAiDurableObject {
 	 * @returns A Promise that resolves to a Response object containing the generated changes.
 	 */
 	private async generate(request: Request) {
-		const prompt = await request.json()
+		const prompt = (await request.json()) as TLAiSerializedPrompt
 
 		try {
 			console.log('Prompting model...')
-			console.log(prompt)
-			const res = await promptGoogleModel(this.googleModel, prompt)
 
-			console.log(res)
-			const response = JSON.parse(res as string)
-			console.error('AI response:', response)
+			const res = await promptOpenaiModel(this.openaiModel, prompt)
 
-			for (const change of response.changes) {
-				if (change.shape?.props) {
-					change.shape.props = JSON.parse(change.shape.props)
+			const response = res.choices[0]?.message?.parsed
+
+			const changes: TLAiChange[] = []
+
+			if (!response) {
+				throw Error('No response')
+			}
+
+			let finalResponse
+
+			switch (this.provider) {
+				case 'openai': {
+					// build the changes
+					for (const event of response.events) {
+						switch (event.type) {
+							case 'create': {
+								let shape: CreateShapeChange['shape']
+
+								if (event.shape.type === 'text') {
+									shape = {
+										type: 'text',
+										x: event.shape.x,
+										y: event.shape.y - 12,
+										props: {
+											text: event.shape.text,
+											color: event.shape.color ?? 'black',
+											textAlign: event.shape.textAlign ?? 'middle',
+										},
+									}
+								} else if (event.shape.type === 'line') {
+									const minX = Math.min(event.shape.x1, event.shape.x2)
+									const minY = Math.min(event.shape.y1, event.shape.y2)
+									shape = {
+										type: 'line',
+										x: minX,
+										y: minY,
+										props: {
+											points: [
+												{
+													x: event.shape.x1 - minX,
+													y: event.shape.y1 - minY,
+												},
+												{
+													x: event.shape.x2 - minX,
+													y: event.shape.y2 - minY,
+												},
+											],
+											color: event.shape.color ?? 'black',
+										},
+									}
+								} else {
+									shape = {
+										type: 'geo',
+										x: event.shape.x,
+										y: event.shape.y,
+										props: {
+											geo: event.shape.type,
+											w: event.shape.width,
+											h: event.shape.height,
+											color: event.shape.color ?? 'black',
+											fill: event.shape.fill ?? 'none',
+											text: event.shape.text ?? '',
+										},
+									}
+								}
+								const change: CreateShapeChange = {
+									type: 'createShape',
+									description: event.intent ?? '',
+									shape,
+								}
+
+								changes.push(change)
+								break
+							}
+							case 'move': {
+								const change: TLAiChange = {
+									type: 'updateShape',
+									description: event.intent ?? '',
+									shape: {
+										id: event.shapeId as any,
+										x: event.x,
+										y: event.y,
+									},
+								}
+
+								changes.push(change)
+								break
+							}
+							case 'label': {
+								const change: TLAiChange = {
+									type: 'updateShape',
+									description: event.intent ?? '',
+									shape: {
+										id: event.shapeId as any,
+										props: {
+											text: event.text,
+										},
+									},
+								}
+
+								changes.push(change)
+								break
+							}
+							case 'delete': {
+								const change: TLAiChange = {
+									type: 'deleteShape',
+									description: event.intent ?? '',
+									shapeId: event.shapeId as any,
+								}
+
+								changes.push(change)
+								break
+							}
+						}
+					}
+
+					finalResponse = {
+						changes,
+						summary: response.long_description_of_strategy,
+					}
+					break
 				}
-				if (change.binding?.props) {
-					change.binding.props = JSON.parse(change.binding.props)
+				case 'google': {
+					const res = await promptGoogleModel(this.googleModel, prompt)
+
+					const response = JSON.parse(res as string) as {
+						summary: string
+						changes: TLAiChange[]
+					}
+
+					for (const change of response.changes) {
+						if (change.type === 'createShape' || change.type === 'updateShape') {
+							// problem here
+							if (change.shape?.props) {
+								change.shape.props = JSON.parse(change.shape.props as any)
+							}
+							// 	if (change.binding?.props) {
+							// 		change.binding.props = JSON.parse(change.binding.props)
+							// 	}
+						}
+					}
+
+					finalResponse = {
+						changes: response.changes,
+						summary: response.summary,
+					}
 				}
 			}
 
-			const finalResponse = JSON.stringify(response)
+			console.log(JSON.stringify(finalResponse, null, 2))
 
 			// Send back the response as a JSON object
-			return new Response(finalResponse, {
+			return new Response(JSON.stringify(finalResponse), {
 				headers: { 'Content-Type': 'application/json' },
 			})
 		} catch (error: any) {

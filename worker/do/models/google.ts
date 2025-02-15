@@ -8,7 +8,7 @@ import {
 	SchemaType,
 	SingleRequestOptions,
 } from '@google/generative-ai'
-import { TLAiPrompt } from '../../../shared/types'
+import { TLAiSerializedPrompt } from '../../../shared/types'
 import { Environment } from '../../types'
 import { SYSTEM_INSTRUCTION } from './prompt'
 
@@ -156,7 +156,7 @@ export function getGoogleApiKey(env: Environment) {
  * @param inputsDescription - The description of the inputs to give to the model.
  * @param procedure - The procedure to give to the model.
  */
-export async function promptGoogleModel(model: GoogleModel, prompt: TLAiPrompt) {
+export async function promptGoogleModel(model: GoogleModel, prompt: TLAiSerializedPrompt) {
 	const imageParts: InlineDataPart[] = []
 
 	if (prompt.image) {

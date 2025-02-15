@@ -62,13 +62,13 @@ export interface TLAiSerializedPrompt {
 export interface CreateShapeChange {
 	type: 'createShape'
 	description: string
-	shape: TLShapePartial
+	shape: Omit<TLShapePartial, 'id'>
 }
 
 export interface UpdateShapeChange {
 	type: 'updateShape'
 	description: string
-	shape: TLShapePartial
+	shape: Omit<TLShapePartial, 'type'>
 }
 
 export interface DeleteShapeChange {
