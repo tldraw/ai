@@ -65,11 +65,12 @@ function ContextBoundsHelper() {
 function InputPromptHelper() {
 	const editor = useEditor()
 
-	const { prompt, repeat } = useTldrawAiDemo()
+	const { prompt, stream, repeat } = useTldrawAiDemo()
 
 	useEffect(() => {
 		;(window as any).editor = editor
 		;(window as any).prompt = (str: string) => prompt(str)
+		;(window as any).stream = (str: string) => stream(str)
 		;(window as any).repeat = () => repeat()
 
 		// let cancelled = false
@@ -106,7 +107,7 @@ function InputPromptHelper() {
 			try {
 				const formData = new FormData(e.currentTarget)
 				const value = formData.get('input') as string
-				const { promise, cancel } = value === 'repeat' ? repeat() : prompt(value)
+				const { promise, cancel } = value === 'repeat' ? repeat() : stream(value)
 				setState({
 					name: 'loading',
 					cancel: (e) => {

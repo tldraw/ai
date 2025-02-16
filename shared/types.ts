@@ -1,5 +1,6 @@
 import {
 	BoxModel,
+	TLBinding,
 	TLBindingCreate,
 	TLBindingId,
 	TLBindingUpdate,
@@ -96,4 +97,13 @@ export type TLAiChange =
 	| UpdateBindingChange
 	| DeleteBindingChange
 
-export type TLAiContent = Omit<TLContent, 'schema' | 'rootShapeIds'>
+export type TLAiContent = Omit<TLContent, 'schema' | 'rootShapeIds'> & {
+	bindings: TLBinding[]
+}
+
+/**
+ * The response from the AI.
+ */
+export type TLAiResult = {
+	changes: TLAiChange[]
+}

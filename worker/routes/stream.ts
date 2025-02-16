@@ -10,8 +10,16 @@ export async function stream(request: IRequest, env: Environment) {
 		body: request.body as any,
 	})
 
-	// todo: getting an immutable headers error from our cors middleware unless we create a new response
 	return new Response(response.body as BodyInit, {
-		headers: { 'Content-Type': 'application/json' },
+		headers: {
+			'Content-Type': 'text/event-stream',
+			'Cache-Control': 'no-cache, no-transform',
+			Connection: 'keep-alive',
+			'X-Accel-Buffering': 'no',
+			'Transfer-Encoding': 'chunked',
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': 'POST, OPTIONS',
+			'Access-Control-Allow-Headers': 'Content-Type',
+		},
 	})
 }

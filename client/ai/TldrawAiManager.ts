@@ -149,17 +149,23 @@ export class TldrawAiManager {
 		// Get the page content (same as what we put on the clipboard when a user copies) for the shapes
 		// that are included (contained or colliding with) the provided bounds
 
-		let content: TLAiContent | undefined = editor.getContentFromCurrentPage(
-			editor
-				.getCurrentPageShapesSorted()
-				.filter((s) => bounds.includes(editor.getShapeMaskedPageBounds(s)!))
-		)
+		let content: TLAiContent | undefined = {
+			bindings: [],
+			shapes: [],
+			assets: [],
+			...editor.getContentFromCurrentPage(
+				editor
+					.getCurrentPageShapesSorted()
+					.filter((s) => bounds.includes(editor.getShapeMaskedPageBounds(s)!))
+			),
+		}
 
 		// If we don't have content, it's either an empty page or an empty section of the page.
 		// This is an acceptable case; but let's send along an empty content instead of undefined.
 		if (content) {
 			// the content is a TLContent, but we want to omit the schema for TLAiContent
 			content.shapes = structuredClone(content.shapes)
+			content.bindings = structuredClone(content.bindings)
 			delete (content as any).schema
 			delete (content as any).rootShapeIds
 		} else {

@@ -6,25 +6,15 @@ import {
 	ChatCompletionDeveloperMessageParam,
 	ChatCompletionUserMessageParam,
 } from 'openai/resources/index.mjs'
-import {
-	IndexKey,
-	TLArrowBinding,
-	TLArrowShape,
-	TLGeoShape,
-	TLLineShape,
-	TLShapePartial,
-	TLTextShape,
-} from 'tldraw'
 import { TLAiSerializedPrompt } from '../../../shared/types'
-import {
-	ISimpleEvent,
-	ISimpleShape,
-	ModelResponse,
-	OPENAI_SYSTEM_PROMPT,
-	SimpleEvent,
-} from './openai_schema'
+import { canvasContentToSimpleContent } from './canvasContentToSimpleContent'
+import { ISimpleEvent, ModelResponse, SimpleEvent } from './schema'
+import { OPENAI_SYSTEM_PROMPT } from './system-prompt'
 
-export async function* promptOpenaiModel(
+/**
+ * Prompt the OpenAI model with the given prompt. Stream the events as they come back.
+ */
+export async function* promptAndStreamEvents(
 	model: OpenAI,
 	prompt: TLAiSerializedPrompt
 ): AsyncGenerator<ISimpleEvent> {
@@ -89,8 +79,6 @@ export async function* promptOpenaiModel(
 		events.push(maybeUnfinishedEvent)
 		yield maybeUnfinishedEvent
 	}
-
-	console.log(events)
 
 	return events
 }
@@ -190,165 +178,4 @@ function buildUserMessages(prompt: TLAiSerializedPrompt) {
 	}
 
 	return userMessage
-}
-
-function canvasContentToSimpleContent(content: TLAiSerializedPrompt['canvasContent']): {
-	shapes: ISimpleShape[]
-} {
-	return {
-		shapes: compact(
-			content.shapes.map((shape) => {
-				if (shape.type === 'text') {
-					const s = shape as TLTextShape
-					return {
-						shapeId: s.id,
-						type: 'text',
-						text: s.props.text,
-						x: s.x,
-						y: s.y,
-						color: s.props.color,
-						textAlign: s.props.textAlign,
-						note: (s.meta?.description as string) ?? '',
-					}
-				}
-
-				if (shape.type === 'geo') {
-					const s = shape as TLGeoShape
-					if (s.props.geo === 'rectangle' || s.props.geo === 'ellipse') {
-						return {
-							shapeId: s.id,
-							type: s.props.geo,
-							x: s.x,
-							y: s.y,
-							width: s.props.w,
-							height: s.props.h,
-							color: s.props.color,
-							fill: s.props.fill,
-							text: s.props.text,
-							note: (s.meta?.description as string) ?? '',
-						}
-					}
-				}
-
-				if (shape.type === 'line') {
-					const s = shape as TLLineShape
-					const points = Object.values(s.props.points).sort((a, b) =>
-						a.index.localeCompare(b.index)
-					)
-					return {
-						shapeId: s.id,
-						type: 'line',
-						x1: points[0].x + s.x,
-						y1: points[0].y + s.y,
-						x2: points[1].x + s.x,
-						y2: points[1].y + s.y,
-						color: s.props.color,
-						note: (s.meta?.description as string) ?? '',
-					}
-				}
-
-				if (shape.type === 'arrow') {
-					const s = shape as TLArrowShape
-					const { bindings = [] } = content
-					const arrowBindings = bindings.filter(
-						(b) => b.type === 'arrow' && b.fromId === s.id
-					) as TLArrowBinding[]
-					const startBinding = arrowBindings.find((b) => b.props.terminal === 'start')
-					const endBinding = arrowBindings.find((b) => b.props.terminal === 'end')
-
-					return {
-						shapeId: s.id,
-						type: 'arrow',
-						fromId: startBinding?.toId ?? null,
-						toId: endBinding?.toId ?? null,
-						x1: s.props.start.x,
-						y1: s.props.start.y,
-						x2: s.props.end.x,
-						y2: s.props.end.y,
-						color: s.props.color,
-						text: s.props.text,
-						note: (s.meta?.description as string) ?? '',
-					}
-				}
-			})
-		),
-	}
-}
-
-export function simpleShapeToCanvasShape(shape: ISimpleShape): TLShapePartial {
-	if (shape.type === 'text') {
-		return {
-			id: shape.shapeId as any,
-			type: 'text',
-			x: shape.x,
-			y: shape.y - 12,
-			props: {
-				text: shape.text,
-				color: shape.color ?? 'black',
-				textAlign: shape.textAlign ?? 'middle',
-			},
-			meta: {
-				description: shape.note,
-			},
-		}
-	} else if (shape.type === 'line') {
-		const minX = Math.min(shape.x1, shape.x2)
-		const minY = Math.min(shape.y1, shape.y2)
-		return {
-			id: shape.shapeId as any,
-			type: 'line',
-			x: minX,
-			y: minY,
-			props: {
-				points: {
-					a1: {
-						id: 'a1',
-						index: 'a2' as IndexKey,
-						x: shape.x1 - minX,
-						y: shape.y1 - minY,
-					},
-					a2: {
-						id: 'a2',
-						index: 'a2' as IndexKey,
-						x: shape.x2 - minX,
-						y: shape.y2 - minY,
-					},
-				},
-				color: shape.color ?? 'black',
-			},
-		}
-	} else if (shape.type === 'arrow') {
-		// todo: create binding
-		return {
-			id: shape.shapeId as any,
-			type: 'arrow',
-			x: 0,
-			y: 0,
-			props: {
-				color: shape.color ?? 'black',
-				text: shape.text ?? '',
-			},
-		}
-	} else if (shape.type === 'rectangle' || shape.type === 'ellipse') {
-		return {
-			id: shape.shapeId as any,
-			type: 'geo',
-			x: shape.x,
-			y: shape.y,
-			props: {
-				geo: shape.type,
-				w: shape.width,
-				h: shape.height,
-				color: shape.color ?? 'black',
-				fill: shape.fill ?? 'none',
-				text: shape.text ?? '',
-			},
-		}
-	} else {
-		throw new Error('Unknown shape type')
-	}
-}
-
-function compact<T>(arr: T[]): Exclude<T, undefined>[] {
-	return arr.filter(Boolean) as Exclude<T, undefined>[]
 }
