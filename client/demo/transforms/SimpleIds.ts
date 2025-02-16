@@ -10,8 +10,12 @@ export class SimpleIds extends TldrawAiTransform {
 
 	transformPrompt = (input: TLAiPrompt) => {
 		// Collect all ids, write simple ids, and write the simple ids
-		for (const shape of input.canvasContent.shapes) {
+		for (const shape of input.canvasContent.shapes ?? []) {
 			this.collectAllIdsRecursively(shape, this.mapObjectWithIdAndWriteSimple)
+		}
+
+		for (const binding of input.canvasContent.bindings ?? []) {
+			this.collectAllIdsRecursively(binding, this.mapObjectWithIdAndWriteSimple)
 		}
 
 		return input
@@ -51,7 +55,7 @@ export class SimpleIds extends TldrawAiTransform {
 				}
 			}
 			case 'createBinding': {
-				const { binding } = change
+				let { binding } = change
 
 				const { id: simpleId } = binding
 				const originalId = createBindingId(simpleId)
@@ -59,6 +63,9 @@ export class SimpleIds extends TldrawAiTransform {
 				this.simpleIdsToOriginalIds.set(simpleId, originalId)
 				binding.id = originalId
 
+				binding = this.collectAllIdsRecursively(change.binding, this.writeOriginalIds)
+
+				console.log(binding)
 				return {
 					...change,
 					binding,

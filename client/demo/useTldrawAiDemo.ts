@@ -10,7 +10,7 @@ export function useTldrawAiDemo() {
 		transforms: [SimpleIds, ShapeDescriptions, SimpleCoordinates],
 	})
 
-	return useCallback(
+	const prompt = useCallback(
 		(message: TLAiPrompt['message']) => {
 			let cancelled = false
 			const controller = new AbortController()
@@ -58,6 +58,44 @@ export function useTldrawAiDemo() {
 		},
 		[ai]
 	)
+
+	const repeat = useCallback(() => {
+		let cancelled = false
+		const controller = new AbortController()
+		const signal = controller.signal
+
+		const promise = new Promise<void>(async (resolve) => {
+			if (ai) {
+				const { handleChange } = await ai.generate('')
+
+				const changes = await repeatChangesFromBackend(signal).catch((error) => {
+					if (error.name === 'AbortError') {
+						console.error('Cancelled')
+					} else {
+						console.error('Fetch error:', error)
+					}
+				})
+
+				if (changes && !cancelled) {
+					for (const change of changes) {
+						handleChange(change)
+					}
+				}
+			}
+
+			resolve()
+		})
+
+		return {
+			promise,
+			cancel: () => {
+				cancelled = true
+				controller.abort()
+			},
+		}
+	}, [ai])
+
+	return { prompt, repeat }
 }
 
 async function getChangesFromBackend(
@@ -65,6 +103,27 @@ async function getChangesFromBackend(
 	signal: AbortSignal
 ): Promise<TLAiChange[]> {
 	const res = await fetch(`${process.env.VITE_AI_SERVER_URL}/generate`, {
+		method: 'POST',
+		body: JSON.stringify(prompt),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		signal: signal,
+	})
+
+	const result: {
+		changes: TLAiChange[]
+		description: string
+		summary: string
+	} = await res.json()
+
+	console.log(result)
+
+	return result.changes
+}
+
+async function repeatChangesFromBackend(signal: AbortSignal): Promise<TLAiChange[]> {
+	const res = await fetch(`${process.env.VITE_AI_SERVER_URL}/repeat`, {
 		method: 'POST',
 		body: JSON.stringify(prompt),
 		headers: {

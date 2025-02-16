@@ -4,7 +4,20 @@ import { TldrawAiTransform } from '../../ai/TldrawAiTransform'
 export class ShapeDescriptions extends TldrawAiTransform {
 	transformChange = (change: TLAiChange) => {
 		switch (change.type) {
-			case 'createShape':
+			case 'createShape': {
+				const { shape, description } = change
+
+				if (description) {
+					shape.meta = {
+						...shape.meta,
+						description,
+					}
+				}
+				return {
+					...change,
+					shape,
+				}
+			}
 			case 'updateShape': {
 				const { shape, description } = change
 

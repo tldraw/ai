@@ -1,8 +1,34 @@
+var __create = Object.create;
 var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
+var __commonJS = (cb, mod) => function __require() {
+  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 
-// .wrangler/tmp/bundle-g9TFe7/checked-fetch.js
-var urls = /* @__PURE__ */ new Set();
+// .wrangler/tmp/bundle-aLeCKV/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -18,16 +44,294 @@ function checkURL(request, init) {
     }
   }
 }
-__name(checkURL, "checkURL");
-globalThis.fetch = new Proxy(globalThis.fetch, {
-  apply(target, thisArg, argArray) {
-    const [request, init] = argArray;
-    checkURL(request, init);
-    return Reflect.apply(target, thisArg, argArray);
+var urls;
+var init_checked_fetch = __esm({
+  ".wrangler/tmp/bundle-aLeCKV/checked-fetch.js"() {
+    "use strict";
+    urls = /* @__PURE__ */ new Set();
+    __name(checkURL, "checkURL");
+    globalThis.fetch = new Proxy(globalThis.fetch, {
+      apply(target, thisArg, argArray) {
+        const [request, init] = argArray;
+        checkURL(request, init);
+        return Reflect.apply(target, thisArg, argArray);
+      }
+    });
   }
 });
 
+// wrangler-modules-watch:wrangler:modules-watch
+var init_wrangler_modules_watch = __esm({
+  "wrangler-modules-watch:wrangler:modules-watch"() {
+    init_checked_fetch();
+    init_modules_watch_stub();
+  }
+});
+
+// node_modules/wrangler/templates/modules-watch-stub.js
+var init_modules_watch_stub = __esm({
+  "node_modules/wrangler/templates/modules-watch-stub.js"() {
+    init_wrangler_modules_watch();
+  }
+});
+
+// node_modules/best-effort-json-parser/dist/parse.js
+var require_parse = __commonJS({
+  "node_modules/best-effort-json-parser/dist/parse.js"(exports) {
+    "use strict";
+    init_checked_fetch();
+    init_modules_watch_stub();
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.parse = void 0;
+    function parse2(s2) {
+      if (s2 === void 0) {
+        return void 0;
+      }
+      if (s2 === null) {
+        return null;
+      }
+      if (s2 === "") {
+        return "";
+      }
+      s2 = s2.replace(/\\+$/, (match) => match.length % 2 === 0 ? match : match.slice(0, -1));
+      try {
+        return JSON.parse(s2);
+      } catch (e) {
+        const [data, reminding] = s2.trimLeft()[0] === ":" ? parseAny(s2, e) : parseAny(s2, e, parseStringWithoutQuote);
+        parse2.lastParseReminding = reminding;
+        if (parse2.onExtraToken && reminding.length > 0) {
+          const trimmedReminding = reminding.trimRight();
+          parse2.lastParseReminding = trimmedReminding;
+          if (trimmedReminding.length > 0) {
+            parse2.onExtraToken(s2, data, trimmedReminding);
+          }
+        }
+        return data;
+      }
+    }
+    __name(parse2, "parse");
+    exports.parse = parse2;
+    (function(parse3) {
+      parse3.onExtraToken = (text, data, reminding) => {
+        console.error("parsed json with extra tokens:", {
+          text,
+          data,
+          reminding
+        });
+      };
+    })(parse2 = exports.parse || (exports.parse = {}));
+    function parseAny(s2, e, fallback) {
+      const parser = parsers[s2[0]] || fallback;
+      if (!parser) {
+        console.error(`no parser registered for ${JSON.stringify(s2[0])}:`, { s: s2 });
+        throw e;
+      }
+      return parser(s2, e);
+    }
+    __name(parseAny, "parseAny");
+    function parseStringCasual(s2, e, delimiters) {
+      if (s2[0] === '"') {
+        return parseString(s2);
+      }
+      if (s2[0] === "'") {
+        return parseSingleQuoteString(s2);
+      }
+      return parseStringWithoutQuote(s2, e, delimiters);
+    }
+    __name(parseStringCasual, "parseStringCasual");
+    var parsers = {};
+    function skipSpace(s2) {
+      return s2.trimLeft();
+    }
+    __name(skipSpace, "skipSpace");
+    parsers[" "] = parseSpace;
+    parsers["\r"] = parseSpace;
+    parsers["\n"] = parseSpace;
+    parsers["	"] = parseSpace;
+    function parseSpace(s2, e) {
+      s2 = skipSpace(s2);
+      return parseAny(s2, e);
+    }
+    __name(parseSpace, "parseSpace");
+    parsers["["] = parseArray;
+    function parseArray(s2, e) {
+      s2 = s2.substr(1);
+      const acc = [];
+      s2 = skipSpace(s2);
+      for (; s2.length > 0; ) {
+        if (s2[0] === "]") {
+          s2 = s2.substr(1);
+          break;
+        }
+        const res = parseAny(s2, e, (s3, e2) => parseStringWithoutQuote(s3, e2, [",", "]"]));
+        acc.push(res[0]);
+        s2 = res[1];
+        s2 = skipSpace(s2);
+        if (s2[0] === ",") {
+          s2 = s2.substring(1);
+          s2 = skipSpace(s2);
+        }
+      }
+      return [acc, s2];
+    }
+    __name(parseArray, "parseArray");
+    for (const c2 of "0123456789.-".slice()) {
+      parsers[c2] = parseNumber;
+    }
+    function parseNumber(s2) {
+      for (let i = 0; i < s2.length; i++) {
+        const c2 = s2[i];
+        if (parsers[c2] === parseNumber) {
+          continue;
+        }
+        const num = s2.substring(0, i);
+        s2 = s2.substring(i);
+        return [numToStr(num), s2];
+      }
+      return [numToStr(s2), ""];
+    }
+    __name(parseNumber, "parseNumber");
+    function numToStr(s2) {
+      if (s2 === "-") {
+        return -0;
+      }
+      const num = +s2;
+      if (Number.isNaN(num)) {
+        return s2;
+      }
+      return num;
+    }
+    __name(numToStr, "numToStr");
+    parsers['"'] = parseString;
+    function parseString(s2) {
+      for (let i = 1; i < s2.length; i++) {
+        const c2 = s2[i];
+        if (c2 === "\\") {
+          i++;
+          continue;
+        }
+        if (c2 === '"') {
+          const str2 = fixEscapedCharacters(s2.substring(0, i + 1));
+          s2 = s2.substring(i + 1);
+          return [JSON.parse(str2), s2];
+        }
+      }
+      return [JSON.parse(fixEscapedCharacters(s2) + '"'), ""];
+    }
+    __name(parseString, "parseString");
+    function fixEscapedCharacters(s2) {
+      return s2.replace(/\n/g, "\\n").replace(/\t/g, "\\t").replace(/\r/g, "\\r");
+    }
+    __name(fixEscapedCharacters, "fixEscapedCharacters");
+    parsers["'"] = parseSingleQuoteString;
+    function parseSingleQuoteString(s2) {
+      for (let i = 1; i < s2.length; i++) {
+        const c2 = s2[i];
+        if (c2 === "\\") {
+          i++;
+          continue;
+        }
+        if (c2 === "'") {
+          const str2 = fixEscapedCharacters(s2.substring(0, i + 1));
+          s2 = s2.substring(i + 1);
+          return [JSON.parse('"' + str2.slice(1, -1) + '"'), s2];
+        }
+      }
+      return [JSON.parse('"' + fixEscapedCharacters(s2.slice(1)) + '"'), ""];
+    }
+    __name(parseSingleQuoteString, "parseSingleQuoteString");
+    function parseStringWithoutQuote(s2, e, delimiters = [" "]) {
+      const index = Math.min(...delimiters.map((delimiter) => {
+        const index2 = s2.indexOf(delimiter);
+        return index2 === -1 ? s2.length : index2;
+      }));
+      const value = s2.substring(0, index).trim();
+      const rest = s2.substring(index);
+      return [value, rest];
+    }
+    __name(parseStringWithoutQuote, "parseStringWithoutQuote");
+    parsers["{"] = parseObject;
+    function parseObject(s2, e) {
+      s2 = s2.substr(1);
+      const acc = {};
+      s2 = skipSpace(s2);
+      for (; s2.length > 0; ) {
+        if (s2[0] === "}") {
+          s2 = s2.substr(1);
+          break;
+        }
+        const keyRes = parseStringCasual(s2, e, [":", "}"]);
+        const key = keyRes[0];
+        s2 = keyRes[1];
+        s2 = skipSpace(s2);
+        if (s2[0] !== ":") {
+          acc[key] = void 0;
+          break;
+        }
+        s2 = s2.substr(1);
+        s2 = skipSpace(s2);
+        if (s2.length === 0) {
+          acc[key] = void 0;
+          break;
+        }
+        const valueRes = parseAny(s2, e);
+        acc[key] = valueRes[0];
+        s2 = valueRes[1];
+        s2 = skipSpace(s2);
+        if (s2[0] === ",") {
+          s2 = s2.substr(1);
+          s2 = skipSpace(s2);
+        }
+      }
+      return [acc, s2];
+    }
+    __name(parseObject, "parseObject");
+    parsers["t"] = parseTrue;
+    function parseTrue(s2, e) {
+      return parseToken(s2, `true`, true, e);
+    }
+    __name(parseTrue, "parseTrue");
+    parsers["f"] = parseFalse;
+    function parseFalse(s2, e) {
+      return parseToken(s2, `false`, false, e);
+    }
+    __name(parseFalse, "parseFalse");
+    parsers["n"] = parseNull;
+    function parseNull(s2, e) {
+      return parseToken(s2, `null`, null, e);
+    }
+    __name(parseNull, "parseNull");
+    function parseToken(s2, tokenStr, tokenVal, e) {
+      for (let i = tokenStr.length; i >= 1; i--) {
+        if (s2.startsWith(tokenStr.slice(0, i))) {
+          return [tokenVal, s2.slice(i)];
+        }
+      }
+      {
+        const prefix = JSON.stringify(s2.slice(0, tokenStr.length));
+        console.error(`unknown token starting with ${prefix}:`, { s: s2 });
+        throw e;
+      }
+    }
+    __name(parseToken, "parseToken");
+  }
+});
+
+// .wrangler/tmp/bundle-aLeCKV/middleware-loader.entry.ts
+init_checked_fetch();
+init_modules_watch_stub();
+
+// .wrangler/tmp/bundle-aLeCKV/middleware-insertion-facade.js
+init_checked_fetch();
+init_modules_watch_stub();
+
+// worker/worker.ts
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/itty-router/index.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var t = /* @__PURE__ */ __name(({ base: e = "", routes: t2 = [], ...r2 } = {}) => ({ __proto__: new Proxy({}, { get: (r3, o2, a2, s2) => (r4, ...c2) => t2.push([o2.toUpperCase?.(), RegExp(`^${(s2 = (e + r4).replace(/\/+(\/|$)/g, "$1")).replace(/(\/?\.?):(\w+)\+/g, "($1(?<$2>*))").replace(/(\/?\.?):(\w+)/g, "($1(?<$2>[^$1/]+?))").replace(/\./g, "\\.").replace(/(\/?)\*/g, "($1.*)?")}/*$`), c2, s2]) && a2 }), routes: t2, ...r2, async fetch(e2, ...o2) {
   let a2, s2, c2 = new URL(e2.url), n2 = e2.query = { __proto__: null };
   for (let [e3, t3] of c2.searchParams)
@@ -102,6 +406,8 @@ var y = /* @__PURE__ */ __name((e = {}) => {
 }, "y");
 
 // worker/routes/generate.ts
+init_checked_fetch();
+init_modules_watch_stub();
 async function generate(request, env) {
   const id = env.TLDRAW_AI_DURABLE_OBJECT.idFromName("anonymous");
   const DO = env.TLDRAW_AI_DURABLE_OBJECT.get(id);
@@ -115,7 +421,53 @@ async function generate(request, env) {
 }
 __name(generate, "generate");
 
+// worker/routes/repeat.ts
+init_checked_fetch();
+init_modules_watch_stub();
+async function repeat(request, env) {
+  const id = env.TLDRAW_AI_DURABLE_OBJECT.idFromName("anonymous");
+  const DO = env.TLDRAW_AI_DURABLE_OBJECT.get(id);
+  const response = await DO.fetch(request.url, {
+    method: "POST",
+    body: request.body
+  });
+  return new Response(response.body, {
+    headers: { "Content-Type": "application/json" }
+  });
+}
+__name(repeat, "repeat");
+
+// worker/routes/stream.ts
+init_checked_fetch();
+init_modules_watch_stub();
+async function stream(request, env) {
+  const id = env.TLDRAW_AI_DURABLE_OBJECT.idFromName("anonymous");
+  const DO = env.TLDRAW_AI_DURABLE_OBJECT.get(id);
+  const response = await DO.fetch(request.url, {
+    method: "POST",
+    body: request.body
+  });
+  return new Response(response.body, {
+    headers: { "Content-Type": "application/json" }
+  });
+}
+__name(stream, "stream");
+
+// worker/do/TldrawAiDurableObject.ts
+init_checked_fetch();
+init_modules_watch_stub();
+
+// node_modules/openai/index.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
+// node_modules/openai/internal/qs/index.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/internal/qs/formats.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var default_format = "RFC3986";
 var formatters = {
   RFC1738: (v) => String(v).replace(/%20/g, "+"),
@@ -123,7 +475,13 @@ var formatters = {
 };
 var RFC1738 = "RFC1738";
 
+// node_modules/openai/internal/qs/stringify.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/internal/qs/utils.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var is_array = Array.isArray;
 var hex_table = (() => {
   const array = [];
@@ -489,10 +847,26 @@ function stringify(object, opts = {}) {
 }
 __name(stringify, "stringify");
 
+// node_modules/openai/core.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/version.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var VERSION = "4.85.1";
 
+// node_modules/openai/streaming.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
+// node_modules/openai/_shims/index.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/_shims/registry.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var auto = false;
 var kind = void 0;
 var fetch2 = void 0;
@@ -531,7 +905,13 @@ function setShims(shims, options = { auto: false }) {
 }
 __name(setShims, "setShims");
 
+// node_modules/openai/_shims/web-runtime.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/_shims/MultipartBody.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var MultipartBody = class {
   constructor(body) {
     this.body = body;
@@ -613,6 +993,8 @@ if (!kind)
   setShims(getRuntime(), { auto: true });
 
 // node_modules/openai/error.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var OpenAIError = class extends Error {
 };
 __name(OpenAIError, "OpenAIError");
@@ -732,6 +1114,8 @@ var ContentFilterFinishReasonError = class extends OpenAIError {
 __name(ContentFilterFinishReasonError, "ContentFilterFinishReasonError");
 
 // node_modules/openai/internal/decoders/line.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var __classPrivateFieldSet = function(receiver, state, value, kind2, f2) {
   if (kind2 === "m")
     throw new TypeError("Private method is not writable");
@@ -835,10 +1219,12 @@ function findNewlineIndex(buffer, startIndex) {
 __name(findNewlineIndex, "findNewlineIndex");
 
 // node_modules/openai/internal/stream-utils.mjs
-function ReadableStreamToAsyncIterable(stream) {
-  if (stream[Symbol.asyncIterator])
-    return stream;
-  const reader = stream.getReader();
+init_checked_fetch();
+init_modules_watch_stub();
+function ReadableStreamToAsyncIterable(stream2) {
+  if (stream2[Symbol.asyncIterator])
+    return stream2;
+  const reader = stream2.getReader();
   return {
     async next() {
       try {
@@ -1142,6 +1528,8 @@ function partition(str2, delimiter) {
 __name(partition, "partition");
 
 // node_modules/openai/uploads.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var isResponseLike = /* @__PURE__ */ __name((value) => value != null && typeof value === "object" && typeof value.url === "string" && typeof value.blob === "function", "isResponseLike");
 var isFileLike = /* @__PURE__ */ __name((value) => value != null && typeof value === "object" && typeof value.name === "string" && typeof value.lastModified === "number" && isBlobLike(value), "isFileLike");
 var isBlobLike = /* @__PURE__ */ __name((value) => value != null && typeof value === "object" && typeof value.size === "number" && typeof value.type === "string" && typeof value.text === "function" && typeof value.slice === "function" && typeof value.arrayBuffer === "function", "isBlobLike");
@@ -2008,6 +2396,8 @@ function isObj(obj) {
 __name(isObj, "isObj");
 
 // node_modules/openai/pagination.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Page = class extends AbstractPage {
   constructor(client, response, body, options) {
     super(client, response, body, options);
@@ -2071,7 +2461,21 @@ var CursorPage = class extends AbstractPage {
 };
 __name(CursorPage, "CursorPage");
 
+// node_modules/openai/resources/index.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
+// node_modules/openai/resources/chat/index.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
+// node_modules/openai/resources/chat/chat.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/resource.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var APIResource = class {
   constructor(client) {
     this._client = client;
@@ -2079,7 +2483,13 @@ var APIResource = class {
 };
 __name(APIResource, "APIResource");
 
+// node_modules/openai/resources/chat/completions/completions.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/resources/chat/completions/messages.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Messages = class extends APIResource {
   list(completionId, query = {}, options) {
     if (isRequestOptions(query)) {
@@ -2149,7 +2559,13 @@ __name(Chat, "Chat");
 Chat.Completions = Completions;
 Chat.ChatCompletionsPage = ChatCompletionsPage;
 
+// node_modules/openai/resources/audio/audio.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/resources/audio/speech.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Speech = class extends APIResource {
   /**
    * Generates audio from the input text.
@@ -2166,6 +2582,8 @@ var Speech = class extends APIResource {
 __name(Speech, "Speech");
 
 // node_modules/openai/resources/audio/transcriptions.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Transcriptions = class extends APIResource {
   create(body, options) {
     return this._client.post("/audio/transcriptions", multipartFormRequestOptions({ body, ...options, __metadata: { model: body.model } }));
@@ -2174,6 +2592,8 @@ var Transcriptions = class extends APIResource {
 __name(Transcriptions, "Transcriptions");
 
 // node_modules/openai/resources/audio/translations.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Translations = class extends APIResource {
   create(body, options) {
     return this._client.post("/audio/translations", multipartFormRequestOptions({ body, ...options, __metadata: { model: body.model } }));
@@ -2196,6 +2616,8 @@ Audio.Translations = Translations;
 Audio.Speech = Speech;
 
 // node_modules/openai/resources/batches.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Batches = class extends APIResource {
   /**
    * Creates and executes a batch from an uploaded file of requests
@@ -2230,7 +2652,13 @@ var BatchesPage = class extends CursorPage {
 __name(BatchesPage, "BatchesPage");
 Batches.BatchesPage = BatchesPage;
 
+// node_modules/openai/resources/beta/beta.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/resources/beta/assistants.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Assistants = class extends APIResource {
   /**
    * Create an assistant with a model and instructions.
@@ -2287,13 +2715,33 @@ var AssistantsPage = class extends CursorPage {
 __name(AssistantsPage, "AssistantsPage");
 Assistants.AssistantsPage = AssistantsPage;
 
+// node_modules/openai/resources/beta/chat/chat.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
+// node_modules/openai/resources/beta/chat/completions.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
+// node_modules/openai/lib/ChatCompletionRunner.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
+// node_modules/openai/lib/AbstractChatCompletionRunner.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/lib/RunnableFunction.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function isRunnableFunctionWithParse(fn) {
   return typeof fn.parse === "function";
 }
 __name(isRunnableFunctionWithParse, "isRunnableFunctionWithParse");
 
 // node_modules/openai/lib/chatCompletionUtils.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var isAssistantMessage = /* @__PURE__ */ __name((message) => {
   return message?.role === "assistant";
 }, "isAssistantMessage");
@@ -2305,6 +2753,8 @@ var isToolMessage = /* @__PURE__ */ __name((message) => {
 }, "isToolMessage");
 
 // node_modules/openai/lib/EventStream.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var __classPrivateFieldSet3 = function(receiver, state, value, kind2, f2) {
   if (kind2 === "m")
     throw new TypeError("Private method is not writable");
@@ -2511,6 +2961,8 @@ _EventStream_connectedPromise = /* @__PURE__ */ new WeakMap(), _EventStream_reso
 }, "_EventStream_handleError");
 
 // node_modules/openai/lib/parser.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function makeParseableResponseFormat(response_format, parser) {
   const obj = { ...response_format };
   Object.defineProperties(obj, {
@@ -2756,7 +3208,7 @@ var AbstractChatCompletionRunner = class extends EventStream {
   }
   async _runFunctions(client, params, options) {
     const role = "function";
-    const { function_call = "auto", stream, ...restParams } = params;
+    const { function_call = "auto", stream: stream2, ...restParams } = params;
     const singleFunctionToCall = typeof function_call !== "string" && function_call?.name;
     const { maxChatCompletions = DEFAULT_MAX_CHAT_COMPLETIONS } = options || {};
     const functionsByName = {};
@@ -2815,7 +3267,7 @@ var AbstractChatCompletionRunner = class extends EventStream {
   }
   async _runTools(client, params, options) {
     const role = "tool";
-    const { tool_choice = "auto", stream, ...restParams } = params;
+    const { tool_choice = "auto", stream: stream2, ...restParams } = params;
     const singleFunctionToCall = typeof tool_choice !== "string" && tool_choice?.function?.name;
     const { maxChatCompletions = DEFAULT_MAX_CHAT_COMPLETIONS } = options || {};
     const inputTools = params.tools.map((tool) => {
@@ -2998,7 +3450,17 @@ var ChatCompletionRunner = class extends AbstractChatCompletionRunner {
 };
 __name(ChatCompletionRunner, "ChatCompletionRunner");
 
+// node_modules/openai/lib/ChatCompletionStreamingRunner.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
+// node_modules/openai/lib/ChatCompletionStream.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/_vendor/partial-json-parser/parser.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var STR = 1;
 var NUM = 2;
 var ARR = 4;
@@ -3262,9 +3724,9 @@ var ChatCompletionStream = class extends AbstractChatCompletionRunner {
    * Note that messages sent to the model do not appear in `.on('message')`
    * in this context.
    */
-  static fromReadableStream(stream) {
+  static fromReadableStream(stream2) {
     const runner = new ChatCompletionStream(null);
-    runner._run(() => runner._fromReadableStream(stream));
+    runner._run(() => runner._fromReadableStream(stream2));
     return runner;
   }
   static createChatCompletion(client, params, options) {
@@ -3281,12 +3743,12 @@ var ChatCompletionStream = class extends AbstractChatCompletionRunner {
       signal.addEventListener("abort", () => this.controller.abort());
     }
     __classPrivateFieldGet5(this, _ChatCompletionStream_instances, "m", _ChatCompletionStream_beginRequest).call(this);
-    const stream = await client.chat.completions.create({ ...params, stream: true }, { ...options, signal: this.controller.signal });
+    const stream2 = await client.chat.completions.create({ ...params, stream: true }, { ...options, signal: this.controller.signal });
     this._connected();
-    for await (const chunk of stream) {
+    for await (const chunk of stream2) {
       __classPrivateFieldGet5(this, _ChatCompletionStream_instances, "m", _ChatCompletionStream_addChunk).call(this, chunk);
     }
-    if (stream.controller.signal?.aborted) {
+    if (stream2.controller.signal?.aborted) {
       throw new APIUserAbortError();
     }
     return this._addChatCompletion(__classPrivateFieldGet5(this, _ChatCompletionStream_instances, "m", _ChatCompletionStream_endRequest).call(this));
@@ -3300,16 +3762,16 @@ var ChatCompletionStream = class extends AbstractChatCompletionRunner {
     }
     __classPrivateFieldGet5(this, _ChatCompletionStream_instances, "m", _ChatCompletionStream_beginRequest).call(this);
     this._connected();
-    const stream = Stream.fromReadableStream(readableStream, this.controller);
+    const stream2 = Stream.fromReadableStream(readableStream, this.controller);
     let chatId;
-    for await (const chunk of stream) {
+    for await (const chunk of stream2) {
       if (chatId && chatId !== chunk.id) {
         this._addChatCompletion(__classPrivateFieldGet5(this, _ChatCompletionStream_instances, "m", _ChatCompletionStream_endRequest).call(this));
       }
       __classPrivateFieldGet5(this, _ChatCompletionStream_instances, "m", _ChatCompletionStream_addChunk).call(this, chunk);
       chatId = chunk.id;
     }
-    if (stream.controller.signal?.aborted) {
+    if (stream2.controller.signal?.aborted) {
       throw new APIUserAbortError();
     }
     return this._addChatCompletion(__classPrivateFieldGet5(this, _ChatCompletionStream_instances, "m", _ChatCompletionStream_endRequest).call(this));
@@ -3611,8 +4073,8 @@ var ChatCompletionStream = class extends AbstractChatCompletionRunner {
     };
   }
   toReadableStream() {
-    const stream = new Stream(this[Symbol.asyncIterator].bind(this), this.controller);
-    return stream.toReadableStream();
+    const stream2 = new Stream(this[Symbol.asyncIterator].bind(this), this.controller);
+    return stream2.toReadableStream();
   }
 };
 __name(ChatCompletionStream, "ChatCompletionStream");
@@ -3716,9 +4178,9 @@ __name(assertNever, "assertNever");
 
 // node_modules/openai/lib/ChatCompletionStreamingRunner.mjs
 var ChatCompletionStreamingRunner = class extends ChatCompletionStream {
-  static fromReadableStream(stream) {
+  static fromReadableStream(stream2) {
     const runner = new ChatCompletionStreamingRunner(null);
-    runner._run(() => runner._fromReadableStream(stream));
+    runner._run(() => runner._fromReadableStream(stream2));
     return runner;
   }
   /** @deprecated - please use `runTools` instead. */
@@ -3791,7 +4253,13 @@ __name(Chat2, "Chat");
   Chat3.Completions = Completions2;
 })(Chat2 || (Chat2 = {}));
 
+// node_modules/openai/resources/beta/realtime/realtime.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/resources/beta/realtime/sessions.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Sessions = class extends APIResource {
   /**
    * Create an ephemeral API token for use in client-side applications with the
@@ -3822,7 +4290,13 @@ var Realtime = class extends APIResource {
 __name(Realtime, "Realtime");
 Realtime.Sessions = Sessions;
 
+// node_modules/openai/resources/beta/threads/threads.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/lib/AssistantStream.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var __classPrivateFieldGet6 = function(receiver, state, kind2, f2) {
   if (kind2 === "a" && !f2)
     throw new TypeError("Private accessor was defined without a getter");
@@ -3928,9 +4402,9 @@ var AssistantStream = class extends EventStream {
       }
     };
   }
-  static fromReadableStream(stream) {
+  static fromReadableStream(stream2) {
     const runner = new AssistantStream();
-    runner._run(() => runner._fromReadableStream(stream));
+    runner._run(() => runner._fromReadableStream(stream2));
     return runner;
   }
   async _fromReadableStream(readableStream, options) {
@@ -3941,18 +4415,18 @@ var AssistantStream = class extends EventStream {
       signal.addEventListener("abort", () => this.controller.abort());
     }
     this._connected();
-    const stream = Stream.fromReadableStream(readableStream, this.controller);
-    for await (const event of stream) {
+    const stream2 = Stream.fromReadableStream(readableStream, this.controller);
+    for await (const event of stream2) {
       __classPrivateFieldGet6(this, _AssistantStream_instances, "m", _AssistantStream_addEvent).call(this, event);
     }
-    if (stream.controller.signal?.aborted) {
+    if (stream2.controller.signal?.aborted) {
       throw new APIUserAbortError();
     }
     return this._addRun(__classPrivateFieldGet6(this, _AssistantStream_instances, "m", _AssistantStream_endRequest).call(this));
   }
   toReadableStream() {
-    const stream = new Stream(this[Symbol.asyncIterator].bind(this), this.controller);
-    return stream.toReadableStream();
+    const stream2 = new Stream(this[Symbol.asyncIterator].bind(this), this.controller);
+    return stream2.toReadableStream();
   }
   static createToolAssistantStream(threadId, runId, runs, params, options) {
     const runner = new AssistantStream();
@@ -3970,15 +4444,15 @@ var AssistantStream = class extends EventStream {
       signal.addEventListener("abort", () => this.controller.abort());
     }
     const body = { ...params, stream: true };
-    const stream = await run.submitToolOutputs(threadId, runId, body, {
+    const stream2 = await run.submitToolOutputs(threadId, runId, body, {
       ...options,
       signal: this.controller.signal
     });
     this._connected();
-    for await (const event of stream) {
+    for await (const event of stream2) {
       __classPrivateFieldGet6(this, _AssistantStream_instances, "m", _AssistantStream_addEvent).call(this, event);
     }
-    if (stream.controller.signal?.aborted) {
+    if (stream2.controller.signal?.aborted) {
       throw new APIUserAbortError();
     }
     return this._addRun(__classPrivateFieldGet6(this, _AssistantStream_instances, "m", _AssistantStream_endRequest).call(this));
@@ -4033,12 +4507,12 @@ var AssistantStream = class extends EventStream {
       signal.addEventListener("abort", () => this.controller.abort());
     }
     const body = { ...params, stream: true };
-    const stream = await thread.createAndRun(body, { ...options, signal: this.controller.signal });
+    const stream2 = await thread.createAndRun(body, { ...options, signal: this.controller.signal });
     this._connected();
-    for await (const event of stream) {
+    for await (const event of stream2) {
       __classPrivateFieldGet6(this, _AssistantStream_instances, "m", _AssistantStream_addEvent).call(this, event);
     }
-    if (stream.controller.signal?.aborted) {
+    if (stream2.controller.signal?.aborted) {
       throw new APIUserAbortError();
     }
     return this._addRun(__classPrivateFieldGet6(this, _AssistantStream_instances, "m", _AssistantStream_endRequest).call(this));
@@ -4051,12 +4525,12 @@ var AssistantStream = class extends EventStream {
       signal.addEventListener("abort", () => this.controller.abort());
     }
     const body = { ...params, stream: true };
-    const stream = await run.create(threadId, body, { ...options, signal: this.controller.signal });
+    const stream2 = await run.create(threadId, body, { ...options, signal: this.controller.signal });
     this._connected();
-    for await (const event of stream) {
+    for await (const event of stream2) {
       __classPrivateFieldGet6(this, _AssistantStream_instances, "m", _AssistantStream_addEvent).call(this, event);
     }
-    if (stream.controller.signal?.aborted) {
+    if (stream2.controller.signal?.aborted) {
       throw new APIUserAbortError();
     }
     return this._addRun(__classPrivateFieldGet6(this, _AssistantStream_instances, "m", _AssistantStream_endRequest).call(this));
@@ -4378,6 +4852,8 @@ function assertNever2(_x) {
 __name(assertNever2, "assertNever");
 
 // node_modules/openai/resources/beta/threads/messages.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Messages2 = class extends APIResource {
   /**
    * Create a message.
@@ -4434,7 +4910,13 @@ var MessagesPage = class extends CursorPage {
 __name(MessagesPage, "MessagesPage");
 Messages2.MessagesPage = MessagesPage;
 
+// node_modules/openai/resources/beta/threads/runs/runs.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/resources/beta/threads/runs/steps.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Steps = class extends APIResource {
   retrieve(threadId, runId, stepId, query = {}, options) {
     if (isRequestOptions(query)) {
@@ -4692,7 +5174,17 @@ Threads.RunsPage = RunsPage;
 Threads.Messages = Messages2;
 Threads.MessagesPage = MessagesPage;
 
+// node_modules/openai/resources/beta/vector-stores/vector-stores.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
+// node_modules/openai/resources/beta/vector-stores/file-batches.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/lib/Util.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var allSettledWithThrow = /* @__PURE__ */ __name(async (promises) => {
   const results = await Promise.allSettled(promises);
   const rejected = results.filter((result) => result.status === "rejected");
@@ -4712,6 +5204,8 @@ var allSettledWithThrow = /* @__PURE__ */ __name(async (promises) => {
 }, "allSettledWithThrow");
 
 // node_modules/openai/resources/beta/vector-stores/files.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Files = class extends APIResource {
   /**
    * Create a vector store file by attaching a
@@ -5024,6 +5518,8 @@ Beta.AssistantsPage = AssistantsPage;
 Beta.Threads = Threads;
 
 // node_modules/openai/resources/completions.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Completions3 = class extends APIResource {
   create(body, options) {
     return this._client.post("/completions", { body, ...options, stream: body.stream ?? false });
@@ -5032,6 +5528,8 @@ var Completions3 = class extends APIResource {
 __name(Completions3, "Completions");
 
 // node_modules/openai/resources/embeddings.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Embeddings = class extends APIResource {
   /**
    * Creates an embedding vector representing the input text.
@@ -5043,6 +5541,8 @@ var Embeddings = class extends APIResource {
 __name(Embeddings, "Embeddings");
 
 // node_modules/openai/resources/files.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Files2 = class extends APIResource {
   /**
    * Upload a file that can be used across various endpoints. Individual files can be
@@ -5131,7 +5631,17 @@ var FileObjectsPage = class extends CursorPage {
 __name(FileObjectsPage, "FileObjectsPage");
 Files2.FileObjectsPage = FileObjectsPage;
 
+// node_modules/openai/resources/fine-tuning/fine-tuning.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
+// node_modules/openai/resources/fine-tuning/jobs/jobs.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/resources/fine-tuning/jobs/checkpoints.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Checkpoints = class extends APIResource {
   list(fineTuningJobId, query = {}, options) {
     if (isRequestOptions(query)) {
@@ -5219,6 +5729,8 @@ FineTuning.FineTuningJobsPage = FineTuningJobsPage;
 FineTuning.FineTuningJobEventsPage = FineTuningJobEventsPage;
 
 // node_modules/openai/resources/images.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Images = class extends APIResource {
   /**
    * Creates a variation of a given image.
@@ -5242,6 +5754,8 @@ var Images = class extends APIResource {
 __name(Images, "Images");
 
 // node_modules/openai/resources/models.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Models = class extends APIResource {
   /**
    * Retrieves a model instance, providing basic information about the model such as
@@ -5272,6 +5786,8 @@ __name(ModelsPage, "ModelsPage");
 Models.ModelsPage = ModelsPage;
 
 // node_modules/openai/resources/moderations.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Moderations = class extends APIResource {
   /**
    * Classifies if text and/or image inputs are potentially harmful. Learn more in
@@ -5283,7 +5799,13 @@ var Moderations = class extends APIResource {
 };
 __name(Moderations, "Moderations");
 
+// node_modules/openai/resources/uploads/uploads.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/resources/uploads/parts.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var Parts = class extends APIResource {
   /**
    * Adds a
@@ -5474,7 +5996,13 @@ OpenAI.BatchesPage = BatchesPage;
 OpenAI.Uploads = Uploads;
 var openai_default = OpenAI;
 
+// worker/do/models/google.ts
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/@google/generative-ai/dist/index.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var SchemaType;
 (function(SchemaType2) {
   SchemaType2["STRING"] = "string";
@@ -5596,11 +6124,11 @@ var Task;
   Task2["BATCH_EMBED_CONTENTS"] = "batchEmbedContents";
 })(Task || (Task = {}));
 var RequestUrl = class {
-  constructor(model, task, apiKey, stream, requestOptions) {
+  constructor(model, task, apiKey, stream2, requestOptions) {
     this.model = model;
     this.task = task;
     this.apiKey = apiKey;
-    this.stream = stream;
+    this.stream = stream2;
     this.requestOptions = requestOptions;
   }
   toString() {
@@ -5651,16 +6179,16 @@ async function getHeaders(url) {
   return headers;
 }
 __name(getHeaders, "getHeaders");
-async function constructModelRequest(model, task, apiKey, stream, body, requestOptions) {
-  const url = new RequestUrl(model, task, apiKey, stream, requestOptions);
+async function constructModelRequest(model, task, apiKey, stream2, body, requestOptions) {
+  const url = new RequestUrl(model, task, apiKey, stream2, requestOptions);
   return {
     url: url.toString(),
     fetchOptions: Object.assign(Object.assign({}, buildFetchOptions(requestOptions)), { method: "POST", headers: await getHeaders(url), body })
   };
 }
 __name(constructModelRequest, "constructModelRequest");
-async function makeModelRequest(model, task, apiKey, stream, body, requestOptions = {}, fetchFn = fetch) {
-  const { url, fetchOptions } = await constructModelRequest(model, task, apiKey, stream, body, requestOptions);
+async function makeModelRequest(model, task, apiKey, stream2, body, requestOptions = {}, fetchFn = fetch) {
+  const { url, fetchOptions } = await constructModelRequest(model, task, apiKey, stream2, body, requestOptions);
   return makeRequest(url, fetchOptions, fetchFn);
 }
 __name(makeModelRequest, "makeModelRequest");
@@ -5895,9 +6423,9 @@ function processStream(response) {
   };
 }
 __name(processStream, "processStream");
-async function getResponsePromise(stream) {
+async function getResponsePromise(stream2) {
   const allResponses = [];
-  const reader = stream.getReader();
+  const reader = stream2.getReader();
   while (true) {
     const { done, value } = await reader.read();
     if (done) {
@@ -5907,9 +6435,9 @@ async function getResponsePromise(stream) {
   }
 }
 __name(getResponsePromise, "getResponsePromise");
-function generateResponseSequence(stream) {
+function generateResponseSequence(stream2) {
   return __asyncGenerator(this, arguments, /* @__PURE__ */ __name(function* generateResponseSequence_1() {
-    const reader = stream.getReader();
+    const reader = stream2.getReader();
     while (true) {
       const { value, done } = yield __await(reader.read());
       if (done) {
@@ -5922,7 +6450,7 @@ function generateResponseSequence(stream) {
 __name(generateResponseSequence, "generateResponseSequence");
 function getResponseStream(inputStream) {
   const reader = inputStream.getReader();
-  const stream = new ReadableStream({
+  const stream2 = new ReadableStream({
     start(controller) {
       let currentText = "";
       return pump();
@@ -5956,7 +6484,7 @@ function getResponseStream(inputStream) {
       __name(pump, "pump");
     }
   });
-  return stream;
+  return stream2;
 }
 __name(getResponseStream, "getResponseStream");
 function aggregateResponses(responses) {
@@ -6487,6 +7015,8 @@ var GoogleGenerativeAI = class {
 __name(GoogleGenerativeAI, "GoogleGenerativeAI");
 
 // worker/do/models/prompt.ts
+init_checked_fetch();
+init_modules_watch_stub();
 var SYSTEM_INSTRUCTION = `System Instruction for Canvas Bot:
 
 You are an AI assistant that can create, update, and delete shapes on a canvas. 
@@ -6737,7 +7267,18 @@ async function promptGoogleModel(model, prompt) {
 }
 __name(promptGoogleModel, "promptGoogleModel");
 
+// worker/do/models/openai.ts
+init_checked_fetch();
+init_modules_watch_stub();
+var import_best_effort_json_parser = __toESM(require_parse(), 1);
+
+// node_modules/openai/helpers/zod.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/_vendor/zod-to-json-schema/Options.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var ignoreOverride = Symbol("Let zodToJsonSchema decide on which parser to use");
 var defaultOptions = {
   name: void 0,
@@ -6773,7 +7314,13 @@ var getDefaultOptions = /* @__PURE__ */ __name((options) => {
   };
 }, "getDefaultOptions");
 
+// node_modules/openai/_vendor/zod-to-json-schema/Refs.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/_vendor/zod-to-json-schema/util.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var zodDef = /* @__PURE__ */ __name((zodSchema) => {
   return "_def" in zodSchema ? zodSchema._def : zodSchema;
 }, "zodDef");
@@ -6808,6 +7355,8 @@ var getRefs = /* @__PURE__ */ __name((options) => {
 }, "getRefs");
 
 // node_modules/openai/_vendor/zod-to-json-schema/errorMessages.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function addErrorMessage(res, key, errorMessage, refs) {
   if (!refs?.errorMessages)
     return;
@@ -6825,7 +7374,13 @@ function setResponseValueAndErrors(res, key, value, errorMessage, refs) {
 }
 __name(setResponseValueAndErrors, "setResponseValueAndErrors");
 
+// node_modules/openai/_vendor/zod-to-json-schema/parseDef.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/zod/lib/index.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var util;
 (function(util2) {
   util2.assertEqual = (val) => val;
@@ -10957,12 +11512,16 @@ var z = /* @__PURE__ */ Object.freeze({
 });
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/any.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseAnyDef() {
   return {};
 }
 __name(parseAnyDef, "parseAnyDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/array.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseArrayDef(def, refs) {
   const res = {
     type: "array"
@@ -10988,6 +11547,8 @@ function parseArrayDef(def, refs) {
 __name(parseArrayDef, "parseArrayDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/bigint.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseBigintDef(def, refs) {
   const res = {
     type: "integer",
@@ -11035,6 +11596,8 @@ function parseBigintDef(def, refs) {
 __name(parseBigintDef, "parseBigintDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/boolean.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseBooleanDef() {
   return {
     type: "boolean"
@@ -11043,17 +11606,23 @@ function parseBooleanDef() {
 __name(parseBooleanDef, "parseBooleanDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/branded.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseBrandedDef(_def, refs) {
   return parseDef(_def.type._def, refs);
 }
 __name(parseBrandedDef, "parseBrandedDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/catch.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var parseCatchDef = /* @__PURE__ */ __name((def, refs) => {
   return parseDef(def.innerType._def, refs);
 }, "parseCatchDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/date.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseDateDef(def, refs, overrideDateStrategy) {
   const strategy = overrideDateStrategy ?? refs.dateStrategy;
   if (Array.isArray(strategy)) {
@@ -11114,6 +11683,8 @@ var integerDateParser = /* @__PURE__ */ __name((def, refs) => {
 }, "integerDateParser");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/default.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseDefaultDef(_def, refs) {
   return {
     ...parseDef(_def.innerType._def, refs),
@@ -11123,12 +11694,16 @@ function parseDefaultDef(_def, refs) {
 __name(parseDefaultDef, "parseDefaultDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/effects.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseEffectsDef(_def, refs, forceResolution) {
   return refs.effectStrategy === "input" ? parseDef(_def.schema._def, refs, forceResolution) : {};
 }
 __name(parseEffectsDef, "parseEffectsDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/enum.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseEnumDef(def) {
   return {
     type: "string",
@@ -11138,6 +11713,8 @@ function parseEnumDef(def) {
 __name(parseEnumDef, "parseEnumDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/intersection.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var isJsonSchema7AllOfType = /* @__PURE__ */ __name((type) => {
   if ("type" in type && type.type === "string")
     return false;
@@ -11181,6 +11758,8 @@ function parseIntersectionDef(def, refs) {
 __name(parseIntersectionDef, "parseIntersectionDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/literal.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseLiteralDef(def, refs) {
   const parsedType = typeof def.value;
   if (parsedType !== "bigint" && parsedType !== "number" && parsedType !== "boolean" && parsedType !== "string") {
@@ -11201,7 +11780,17 @@ function parseLiteralDef(def, refs) {
 }
 __name(parseLiteralDef, "parseLiteralDef");
 
+// node_modules/openai/_vendor/zod-to-json-schema/parsers/map.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
+// node_modules/openai/_vendor/zod-to-json-schema/parsers/record.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/string.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var emojiRegex2;
 var zodPatterns = {
   /**
@@ -11570,6 +12159,8 @@ function parseMapDef(def, refs) {
 __name(parseMapDef, "parseMapDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/nativeEnum.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseNativeEnumDef(def) {
   const object = def.values;
   const actualKeys = Object.keys(def.values).filter((key) => {
@@ -11585,6 +12176,8 @@ function parseNativeEnumDef(def) {
 __name(parseNativeEnumDef, "parseNativeEnumDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/never.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseNeverDef() {
   return {
     not: {}
@@ -11593,6 +12186,8 @@ function parseNeverDef() {
 __name(parseNeverDef, "parseNeverDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/null.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseNullDef(refs) {
   return refs.target === "openApi3" ? {
     enum: ["null"],
@@ -11603,7 +12198,13 @@ function parseNullDef(refs) {
 }
 __name(parseNullDef, "parseNullDef");
 
+// node_modules/openai/_vendor/zod-to-json-schema/parsers/nullable.mjs
+init_checked_fetch();
+init_modules_watch_stub();
+
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/union.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var primitiveMappings = {
   ZodString: "string",
   ZodNumber: "number",
@@ -11700,6 +12301,8 @@ function parseNullableDef(def, refs) {
 __name(parseNullableDef, "parseNullableDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/number.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseNumberDef(def, refs) {
   const res = {
     type: "number"
@@ -11750,6 +12353,8 @@ function parseNumberDef(def, refs) {
 __name(parseNumberDef, "parseNumberDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/object.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function decideAdditionalProperties(def, refs) {
   if (refs.removeAdditionalStrategy === "strict") {
     return def.catchall._def.typeName === "ZodNever" ? def.unknownKeys !== "strict" : parseDef(def.catchall._def, {
@@ -11794,6 +12399,8 @@ function parseObjectDef(def, refs) {
 __name(parseObjectDef, "parseObjectDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/optional.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var parseOptionalDef = /* @__PURE__ */ __name((def, refs) => {
   if (refs.currentPath.toString() === refs.propertyPath?.toString()) {
     return parseDef(def.innerType._def, refs);
@@ -11813,6 +12420,8 @@ var parseOptionalDef = /* @__PURE__ */ __name((def, refs) => {
 }, "parseOptionalDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/pipeline.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var parsePipelineDef = /* @__PURE__ */ __name((def, refs) => {
   if (refs.pipeStrategy === "input") {
     return parseDef(def.in._def, refs);
@@ -11833,12 +12442,16 @@ var parsePipelineDef = /* @__PURE__ */ __name((def, refs) => {
 }, "parsePipelineDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/promise.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parsePromiseDef(def, refs) {
   return parseDef(def.type._def, refs);
 }
 __name(parsePromiseDef, "parsePromiseDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/set.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseSetDef(def, refs) {
   const items = parseDef(def.valueType._def, {
     ...refs,
@@ -11860,6 +12473,8 @@ function parseSetDef(def, refs) {
 __name(parseSetDef, "parseSetDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/tuple.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseTupleDef(def, refs) {
   if (def.rest) {
     return {
@@ -11889,6 +12504,8 @@ function parseTupleDef(def, refs) {
 __name(parseTupleDef, "parseTupleDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/undefined.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseUndefinedDef() {
   return {
     not: {}
@@ -11897,12 +12514,16 @@ function parseUndefinedDef() {
 __name(parseUndefinedDef, "parseUndefinedDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/unknown.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 function parseUnknownDef() {
   return {};
 }
 __name(parseUnknownDef, "parseUnknownDef");
 
 // node_modules/openai/_vendor/zod-to-json-schema/parsers/readonly.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var parseReadonlyDef = /* @__PURE__ */ __name((def, refs) => {
   return parseDef(def.innerType._def, refs);
 }, "parseReadonlyDef");
@@ -12050,6 +12671,8 @@ var addMeta = /* @__PURE__ */ __name((def, refs, jsonSchema) => {
 }, "addMeta");
 
 // node_modules/openai/_vendor/zod-to-json-schema/zodToJsonSchema.mjs
+init_checked_fetch();
+init_modules_watch_stub();
 var zodToJsonSchema = /* @__PURE__ */ __name((schema, options) => {
   const refs = getRefs(options);
   const name = typeof options === "string" ? options : options?.nameStrategy === "title" ? void 0 : options?.name;
@@ -12131,6 +12754,8 @@ function zodResponseFormat(zodObject, name, props) {
 __name(zodResponseFormat, "zodResponseFormat");
 
 // worker/do/models/openai_schema.ts
+init_checked_fetch();
+init_modules_watch_stub();
 var SimpleColor = z.enum([
   "red",
   "light-red",
@@ -12151,6 +12776,7 @@ var SimpleLabel = z.string();
 var SimpleRectangleShape = z.object({
   type: z.literal("rectangle"),
   shapeId: z.string(),
+  note: z.string(),
   x: z.number(),
   y: z.number(),
   width: z.number(),
@@ -12162,6 +12788,7 @@ var SimpleRectangleShape = z.object({
 var SimpleEllipseShape = z.object({
   type: z.literal("ellipse"),
   shapeId: z.string(),
+  note: z.string(),
   x: z.number(),
   y: z.number(),
   width: z.number(),
@@ -12173,6 +12800,7 @@ var SimpleEllipseShape = z.object({
 var SimpleLineShape = z.object({
   type: z.literal("line"),
   shapeId: z.string(),
+  note: z.string(),
   x1: z.number(),
   y1: z.number(),
   x2: z.number(),
@@ -12182,17 +12810,32 @@ var SimpleLineShape = z.object({
 var SimpleTextShape = z.object({
   type: z.literal("text"),
   shapeId: z.string(),
+  note: z.string(),
   x: z.number(),
   y: z.number(),
   color: SimpleColor.optional(),
   text: z.string().optional(),
   textAlign: z.enum(["start", "middle", "end"]).optional()
 });
+var SimpleArrowShape = z.object({
+  type: z.literal("arrow"),
+  shapeId: z.string(),
+  note: z.string(),
+  fromId: z.string().nullable(),
+  toId: z.string().nullable(),
+  x1: z.number(),
+  y1: z.number(),
+  x2: z.number(),
+  y2: z.number(),
+  color: SimpleColor.optional(),
+  text: z.string().optional()
+});
 var SimpleShape = z.union([
   SimpleRectangleShape,
   SimpleEllipseShape,
   SimpleLineShape,
-  SimpleTextShape
+  SimpleTextShape,
+  SimpleArrowShape
 ]);
 var SimpleCreateEvent = z.object({
   type: z.literal("create"),
@@ -12227,15 +12870,213 @@ var SimpleEvent = z.union([
   SimpleCreateEvent,
   SimpleMoveEvent,
   SimpleLabelEvent,
+  // SimpleConnectEvent,
   SimpleDeleteEvent
 ]);
 var ModelResponse = z.object({
   long_description_of_strategy: z.string(),
   events: z.array(SimpleEvent)
 });
+var OPENAI_SYSTEM_PROMPT = `
+## System Prompt:
+
+You are an AI assistant that helps the user use a drawing / diagramming program. You will be provided with a prompt that includes a description of the user's intent and the current state of the canvas, including the user's viewport (the part of the canvas that the user is viewing). Your goal is to generate a response that includes a description of your strategy and a list of structured events that represent the actions you would take to satisfy the user's request.
+
+You respond with structured JSON data based on a predefined schema.
+
+### Schema Overview
+
+You are interacting with a system that models shapes (rectangles, ellipses, text) and tracks events (creating, moving, labeling, deleting, or thinking). Your responses should include:
+
+- **A long description of your strategy** (\`long_description_of_strategy\`): Explain your reasoning in plain text.
+- **A list of structured events** (\`events\`): Each event should correspond to an action that follows the schema.
+
+### Shape Schema
+
+Shapes can be:
+
+- **Rectangle (\`rectangle\`)**
+- **Ellipse (\`ellipse\`)**
+- **Text (\`text\`)**
+
+Each shape has:
+
+- \`x\`, \`y\` (numbers, coordinates, the TOP LEFT corner of the shape)
+- \`note\` (a description of the shape's purpose or intent)
+- \`width\` and \`height\` (for rectangles and ellipses)
+- \`color\` (optional, chosen from predefined colors)
+- \`fill\` (optional, for rectangles and ellipses)
+- \`text\` (optional, for text elements)
+- \`textAlign\` (optional, for text elements)
+
+### Event Schema
+
+Events include:
+- **Think (\`think\`)**: The AI describes its intent or reasoning.
+- **Create (\`create\`)**: The AI creates a new shape.
+- **Move (\`move\`)**: The AI moves a shape to a new position.
+- **Label (\`label\`)**: The AI changes a shape's text.
+- **Delete (\`delete\`)**: The AI removes a shape.
+
+Each event must include:
+- A \`type\` (one of \`think\`, \`create\`, \`move\`, \`label\`, \`delete\`)
+- A \`shapeId\` (if applicable)
+- An \`intent\` (descriptive reason for the action)
+
+### Rules
+
+1. **Always return a valid JSON object conforming to the schema.**
+2. **Do not generate extra fields or omit required fields.**
+3. **Provide clear and logical reasoning in \`long_description_of_strategy\`.**
+4. **Ensure each \`shapeId\` is unique and consistent across related events.**
+5. **Use meaningful \`intent\` descriptions for all actions.**
+
+## Useful notes
+
+- Always begin with a clear strategy in \`long_description_of_strategy\`.
+- Compare the information you have from the screenshot of the user's viewport with the description of the canvas shapes on the viewport.
+- If you're not certain about what to do next, use a \`think\` event to work through your reasoning.
+- Text shapes are 32 points tall.
+- Make all of your changes inside of the user's current viewport.
+- Use the \`note\` field to provide context for each shape. This will help you in the future to understand the purpose of each shape.
+- The x and y define the top left corner of the shape. The shape's origin is in its top left corner.
+- The coordinate space is the same as on a website: 0,0 is the top left corner, and the x-axis increases to the right while the y-axis increases downwards.
+- Always make sure that any shapes you create or modify are within the user's viewport.
+- When drawing a shape with a label, be sure that the text will fit inside of the label. Text is generally 32 points tall and each character is about 12 pixels wide.
+
+# Examples
+
+Developer: The user's viewport is { x: 0, y: 0, width: 1000, height: 500 }
+User: Draw a snowman.
+Assistant: {
+	long_description_of_strategy: "I will create three circles, one on top of the other, to represent the snowman's body.",
+	events: [
+		{
+			type: "create",
+			shape: {
+				type: "ellipse",
+				shapeId: "snowman-head",
+				note: "The head of the snowman",
+				x: 100,
+				y: 100,
+				width: 50,
+				height: 50,
+				color: "white",
+				fill: "solid"
+			},
+			intent: "Create the head of the snowman"
+		},
+		{
+			type: "create",
+			shape: {
+				type: "ellipse",
+				shapeId: "snowman-body",
+				note: "The middle body of the snowman",
+				x: 75,
+				y: 150,
+				width: 100,
+				height: 100,
+				color: "white",
+				fill: "solid"
+			},
+			intent: "Create the body of the snowman"
+		},
+		{
+			type: "create",
+			shape: {
+				type: "ellipse",
+				shapeId: "snowman-bottom",
+				note: "The bottom of the snowman",
+				x: 50,
+				y: 250,
+				width: 150,
+				height: 150,
+				color: "white",
+				fill: "solid"
+			},
+			intent: "Create the bottom of the snowman"
+		}
+	]
+}
+`;
 
 // worker/do/models/openai.ts
-async function promptOpenaiModel(model, prompt) {
+async function* promptOpenaiModel(model, prompt) {
+  const systemPrompt = buildSystemPrompt(prompt);
+  const developerMessage = buildDeveloperMessage(prompt);
+  const userMessage = buildUserMessages(prompt);
+  const stream2 = model.beta.chat.completions.stream({
+    model: "gpt-4o-2024-08-06",
+    messages: [systemPrompt, developerMessage, userMessage],
+    response_format: zodResponseFormat(ModelResponse, "event")
+  });
+  let accumulatedText = "";
+  let cursor = 0;
+  const events = [];
+  let maybeUnfinishedEvent = null;
+  for await (const chunk of stream2) {
+    if (!chunk)
+      continue;
+    accumulatedText += chunk.choices[0]?.delta?.content ?? "";
+    const json = (0, import_best_effort_json_parser.parse)(accumulatedText);
+    if (Array.isArray(json?.events)) {
+      for (let i = cursor, len = json.events.length; i < len; i++) {
+        const part = json.events[i];
+        if (i === cursor) {
+          try {
+            SimpleEvent.parse(part);
+            if (i < len) {
+              events.push(part);
+              yield part;
+              maybeUnfinishedEvent = null;
+              cursor++;
+            } else {
+              maybeUnfinishedEvent = part;
+            }
+          } catch {
+          }
+        }
+      }
+    }
+  }
+  if (maybeUnfinishedEvent) {
+    events.push(maybeUnfinishedEvent);
+    yield maybeUnfinishedEvent;
+  }
+  console.log(events);
+  return events;
+}
+__name(promptOpenaiModel, "promptOpenaiModel");
+function buildSystemPrompt(_prompt) {
+  return {
+    role: "system",
+    content: OPENAI_SYSTEM_PROMPT
+  };
+}
+__name(buildSystemPrompt, "buildSystemPrompt");
+function buildDeveloperMessage(prompt) {
+  const developerMessage = {
+    role: "developer",
+    content: []
+  };
+  developerMessage.content.push({
+    type: "text",
+    text: `The user's current viewport is: { x: ${prompt.promptBounds.x}, y: ${prompt.promptBounds.y}, width: ${prompt.promptBounds.w}, height: ${prompt.promptBounds.h} }`
+  });
+  if (prompt.canvasContent) {
+    const simplifiedCanvasContent = canvasContentToSimpleContent(prompt.canvasContent);
+    developerMessage.content.push({
+      type: "text",
+      // todo: clean up all the newlines
+      text: `Here are all of the shapes that are in the user's current viewport:
+
+${JSON.stringify(simplifiedCanvasContent).replaceAll("\n", " ")}`
+    });
+  }
+  return developerMessage;
+}
+__name(buildDeveloperMessage, "buildDeveloperMessage");
+function buildUserMessages(prompt) {
   const userMessage = {
     role: "user",
     content: []
@@ -12251,57 +13092,47 @@ async function promptOpenaiModel(model, prompt) {
       },
       {
         type: "text",
-        text: "This is an image of the canvas."
+        text: "Here is a screenshot of the my current viewport."
       }
     );
   }
-  if (prompt.canvasContent) {
-    const simplifiedCanvasContent = canvasContentToSimpleContent(prompt.canvasContent);
+  if (Array.isArray(prompt.message)) {
     userMessage.content.push({
       type: "text",
-      text: `Here's a description of the canvas content:
-
-${JSON.stringify(simplifiedCanvasContent).replaceAll("\n", " ")}`
+      text: `Here's what I want you to do:`
     });
-  }
-  if (Array.isArray(prompt.message)) {
-    userMessage.content.push(
-      {
-        type: "text",
-        text: `Ok. Using the events provided in the response schema, here's what I want you to do:`
-      },
-      ...prompt.message.map(
-        (message) => message.type === "image" ? {
+    for (const message of prompt.message) {
+      if (message.type === "image") {
+        userMessage.content.push({
           type: "image_url",
           image_url: {
             url: message.src
           }
-        } : { type: "text", text: message.text }
-      )
-    );
+        });
+      } else {
+        userMessage.content.push({
+          type: "text",
+          text: message.text
+        });
+      }
+    }
   } else {
-    userMessage.content.push({ type: "text", text: `The user's prompt is: ${prompt.message}` });
+    userMessage.content.push({
+      type: "text",
+      text: `Using the events provided in the response schema, here's what I want you to do:
+
+${prompt.message}`
+    });
   }
-  return await model.beta.chat.completions.parse({
-    model: "gpt-4o-2024-08-06",
-    messages: [
-      {
-        role: "system",
-        content: "Create a series of events that will satisfy the user prompt."
-      },
-      userMessage
-    ],
-    response_format: zodResponseFormat(ModelResponse, "event")
-  });
+  return userMessage;
 }
-__name(promptOpenaiModel, "promptOpenaiModel");
+__name(buildUserMessages, "buildUserMessages");
 function canvasContentToSimpleContent(content) {
   return {
     shapes: compact(
       content.shapes.map((shape) => {
-        let s2;
         if (shape.type === "text") {
-          s2 = shape;
+          const s2 = shape;
           return {
             shapeId: s2.id,
             type: "text",
@@ -12309,11 +13140,12 @@ function canvasContentToSimpleContent(content) {
             x: s2.x,
             y: s2.y,
             color: s2.props.color,
-            textAlign: s2.props.textAlign
+            textAlign: s2.props.textAlign,
+            note: s2.meta?.description ?? ""
           };
         }
         if (shape.type === "geo") {
-          s2 = shape;
+          const s2 = shape;
           if (s2.props.geo === "rectangle" || s2.props.geo === "ellipse") {
             return {
               shapeId: s2.id,
@@ -12324,12 +13156,13 @@ function canvasContentToSimpleContent(content) {
               height: s2.props.h,
               color: s2.props.color,
               fill: s2.props.fill,
-              text: s2.props.text
+              text: s2.props.text,
+              note: s2.meta?.description ?? ""
             };
           }
         }
         if (shape.type === "line") {
-          s2 = shape;
+          const s2 = shape;
           const points = Object.values(s2.props.points).sort(
             (a2, b) => a2.index.localeCompare(b.index)
           );
@@ -12340,7 +13173,30 @@ function canvasContentToSimpleContent(content) {
             y1: points[0].y + s2.y,
             x2: points[1].x + s2.x,
             y2: points[1].y + s2.y,
-            color: s2.props.color
+            color: s2.props.color,
+            note: s2.meta?.description ?? ""
+          };
+        }
+        if (shape.type === "arrow") {
+          const s2 = shape;
+          const { bindings = [] } = content;
+          const arrowBindings = bindings.filter(
+            (b) => b.type === "arrow" && b.fromId === s2.id
+          );
+          const startBinding = arrowBindings.find((b) => b.props.terminal === "start");
+          const endBinding = arrowBindings.find((b) => b.props.terminal === "end");
+          return {
+            shapeId: s2.id,
+            type: "arrow",
+            fromId: startBinding?.toId ?? null,
+            toId: endBinding?.toId ?? null,
+            x1: s2.props.start.x,
+            y1: s2.props.start.y,
+            x2: s2.props.end.x,
+            y2: s2.props.end.y,
+            color: s2.props.color,
+            text: s2.props.text,
+            note: s2.meta?.description ?? ""
           };
         }
       })
@@ -12351,6 +13207,7 @@ __name(canvasContentToSimpleContent, "canvasContentToSimpleContent");
 function simpleShapeToCanvasShape(shape) {
   if (shape.type === "text") {
     return {
+      id: shape.shapeId,
       type: "text",
       x: shape.x,
       y: shape.y - 12,
@@ -12358,12 +13215,16 @@ function simpleShapeToCanvasShape(shape) {
         text: shape.text,
         color: shape.color ?? "black",
         textAlign: shape.textAlign ?? "middle"
+      },
+      meta: {
+        description: shape.note
       }
     };
   } else if (shape.type === "line") {
     const minX = Math.min(shape.x1, shape.x2);
     const minY = Math.min(shape.y1, shape.y2);
     return {
+      id: shape.shapeId,
       type: "line",
       x: minX,
       y: minY,
@@ -12385,8 +13246,20 @@ function simpleShapeToCanvasShape(shape) {
         color: shape.color ?? "black"
       }
     };
-  } else {
+  } else if (shape.type === "arrow") {
     return {
+      id: shape.shapeId,
+      type: "arrow",
+      x: 0,
+      y: 0,
+      props: {
+        color: shape.color ?? "black",
+        text: shape.text ?? ""
+      }
+    };
+  } else if (shape.type === "rectangle" || shape.type === "ellipse") {
+    return {
+      id: shape.shapeId,
       type: "geo",
       x: shape.x,
       y: shape.y,
@@ -12399,6 +13272,8 @@ function simpleShapeToCanvasShape(shape) {
         text: shape.text ?? ""
       }
     };
+  } else {
+    throw new Error("Unknown shape type");
   }
 }
 __name(simpleShapeToCanvasShape, "simpleShapeToCanvasShape");
@@ -12421,16 +13296,27 @@ var TldrawAiDurableObject = class {
   googleModel;
   openaiModel;
   provider = "openai";
+  prevResponse = null;
   router = n({
     catch: (e) => {
       console.log(e);
       return s(e);
     }
-  }).post("/generate", (request) => this.generate(request)).post("/stream", (request) => this.stream(request));
+  }).post("/generate", (request) => this.generate(request)).post("/repeat", (request) => this.repeat(request)).post("/stream", (request) => this.stream(request));
   // todo: fully implement this
   // `fetch` is the entry point for all requests to the Durable Object
   fetch(request) {
     return this.router.fetch(request);
+  }
+  async repeat(_request) {
+    if (this.prevResponse) {
+      return new Response(JSON.stringify(this.prevResponse), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+    return new Response("No previous response", {
+      status: 404
+    });
   }
   /**
    * Generate a set of changes from the model.
@@ -12441,25 +13327,81 @@ var TldrawAiDurableObject = class {
   async generate(request) {
     const prompt = await request.json();
     try {
-      console.log("Prompting model...");
-      const res = await promptOpenaiModel(this.openaiModel, prompt);
-      const response = res.choices[0]?.message?.parsed;
       const changes = [];
-      if (!response) {
-        throw Error("No response");
-      }
       let finalResponse;
       switch (this.provider) {
         case "openai": {
-          for (const event of response.events) {
+          const events = [];
+          for await (const event of promptOpenaiModel(this.openaiModel, prompt)) {
             switch (event.type) {
               case "create": {
-                const change = {
-                  type: "createShape",
-                  description: event.intent ?? "",
-                  shape: simpleShapeToCanvasShape(event.shape)
-                };
-                changes.push(change);
+                if (event.shape.type === "arrow") {
+                  const { shapeId, fromId, toId, x1, x2, y1, y2 } = event.shape;
+                  const change = {
+                    type: "createShape",
+                    description: event.intent ?? "",
+                    shape: {
+                      id: shapeId,
+                      type: "arrow",
+                      x: 0,
+                      y: 0,
+                      props: {
+                        color: event.shape.color ?? "black",
+                        text: event.shape.text ?? "",
+                        start: { x: x1, y: y1 },
+                        end: { x: x2, y: y2 }
+                      }
+                    }
+                  };
+                  changes.push(change);
+                  const startShape = fromId ? prompt.canvasContent.shapes.find((s2) => s2.id === fromId) : null;
+                  if (startShape) {
+                    changes.push({
+                      type: "createBinding",
+                      description: event.intent ?? "",
+                      binding: {
+                        type: "arrow",
+                        fromId: shapeId,
+                        toId: startShape.id,
+                        props: {
+                          normalizedAnchor: { x: 0.5, y: 0.5 },
+                          isExact: false,
+                          isPrecise: false,
+                          terminal: "start"
+                        },
+                        meta: {},
+                        typeName: "binding"
+                      }
+                    });
+                  }
+                  const endShape = toId ? prompt.canvasContent.shapes.find((s2) => s2.id === toId) : null;
+                  if (endShape) {
+                    changes.push({
+                      type: "createBinding",
+                      description: event.intent ?? "",
+                      binding: {
+                        type: "arrow",
+                        fromId: shapeId,
+                        toId: endShape.id,
+                        props: {
+                          normalizedAnchor: { x: 0.5, y: 0.5 },
+                          isExact: false,
+                          isPrecise: false,
+                          terminal: "end"
+                        },
+                        meta: {},
+                        typeName: "binding"
+                      }
+                    });
+                  }
+                } else {
+                  const change = {
+                    type: "createShape",
+                    description: event.intent ?? "",
+                    shape: simpleShapeToCanvasShape(event.shape)
+                  };
+                  changes.push(change);
+                }
                 break;
               }
               case "move": {
@@ -12502,14 +13444,14 @@ var TldrawAiDurableObject = class {
           }
           finalResponse = {
             changes,
-            summary: response.long_description_of_strategy
+            summary: events.find((e) => e.type === "think")?.text ?? ""
           };
           break;
         }
         case "google": {
-          const res2 = await promptGoogleModel(this.googleModel, prompt);
-          const response2 = JSON.parse(res2);
-          for (const change of response2.changes) {
+          const res = await promptGoogleModel(this.googleModel, prompt);
+          const response = JSON.parse(res);
+          for (const change of response.changes) {
             if (change.type === "createShape" || change.type === "updateShape") {
               if (change.shape?.props) {
                 change.shape.props = JSON.parse(change.shape.props);
@@ -12517,12 +13459,14 @@ var TldrawAiDurableObject = class {
             }
           }
           finalResponse = {
-            changes: response2.changes,
-            summary: response2.summary
+            changes: response.changes,
+            summary: response.summary
           };
         }
       }
-      console.log(JSON.stringify(finalResponse, null, 2));
+      if (!finalResponse)
+        throw Error("No response");
+      this.prevResponse = finalResponse;
       return new Response(JSON.stringify(finalResponse), {
         headers: { "Content-Type": "application/json" }
       });
@@ -12539,7 +13483,7 @@ var TldrawAiDurableObject = class {
    * @returns A Promise that resolves to a Response object containing the generated changes.
    */
   async stream(request) {
-    const stream = new ReadableStream({
+    const stream2 = new ReadableStream({
       start: async (controller) => {
         try {
           const prompt = await request.json();
@@ -12553,7 +13497,7 @@ var TldrawAiDurableObject = class {
         }
       }
     });
-    return new Response(stream, {
+    return new Response(stream2, {
       headers: { "Content-Type": "text/plain" }
     });
   }
@@ -12581,10 +13525,12 @@ var router = n({
     console.error(e);
     return s(e);
   }
-}).post("/generate", generate);
+}).post("/generate", generate).post("/stream", stream).post("/repeat", repeat);
 var worker_default = router;
 
 // node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
+init_checked_fetch();
+init_modules_watch_stub();
 var drainBody = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
   try {
     return await middlewareCtx.next(request, env);
@@ -12603,6 +13549,8 @@ var drainBody = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 var middleware_ensure_req_body_drained_default = drainBody;
 
 // node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
+init_checked_fetch();
+init_modules_watch_stub();
 function reduceError(e) {
   return {
     name: e?.name,
@@ -12625,7 +13573,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-g9TFe7/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-aLeCKV/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -12633,6 +13581,8 @@ var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
 var middleware_insertion_facade_default = worker_default;
 
 // node_modules/wrangler/templates/middleware/common.ts
+init_checked_fetch();
+init_modules_watch_stub();
 var __facade_middleware__ = [];
 function __facade_register__(...args) {
   __facade_middleware__.push(...args.flat());
@@ -12657,7 +13607,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-g9TFe7/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-aLeCKV/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
