@@ -8,9 +8,7 @@ export class SimpleCoordinates extends TldrawAiTransform {
 	adjustments: Record<string, number> = {}
 
 	transformPrompt = (input: TLAiPrompt) => {
-		const { editor } = this
-
-		const { promptBounds, canvasContent } = input
+		const { canvasContent } = input
 
 		for (const s of canvasContent.shapes) {
 			for (const prop of ['x', 'y'] as const) {
@@ -27,16 +25,6 @@ export class SimpleCoordinates extends TldrawAiTransform {
 				}
 			}
 		}
-
-		// Bounds of the shapes
-		// if (canvasContent.shapes.length) {
-		// 	const bounds = Box.Common(canvasContent.shapes.map((s) => editor.getShapePageBounds(s.id)!))
-		// 	this.offset.x = bounds.x - promptBounds.x
-		// 	this.offset.y = bounds.y - promptBounds.y
-		// } else {
-		// 	this.offset.x = promptBounds.x
-		// 	this.offset.y = promptBounds.y
-		// }
 
 		canvasContent.shapes = canvasContent.shapes.map((s) => {
 			if (isPageId(s.parentId)) {

@@ -26,13 +26,15 @@ export function useTldrawAiDemo() {
 					contextBounds: prompt.contextBounds.toJson(),
 				}
 
-				const changes = await getChangesFromBackend(serializedPrompt, signal).catch((error) => {
-					if (error.name === 'AbortError') {
-						console.error('Cancelled')
-					} else {
-						console.error('Fetch error:', error)
+				const changes = await getChangesFromBackend({ prompt: serializedPrompt, signal }).catch(
+					(error) => {
+						if (error.name === 'AbortError') {
+							console.error('Cancelled')
+						} else {
+							console.error('Fetch error:', error)
+						}
 					}
-				})
+				)
 
 				if (changes && !cancelled) {
 					for (const change of changes) {
@@ -73,7 +75,7 @@ export function useTldrawAiDemo() {
 					contextBounds: prompt.contextBounds.toJson(),
 				}
 
-				for await (const change of streamChangesFromBackend(serializedPrompt, signal)) {
+				for await (const change of streamChangesFromBackend({ prompt: serializedPrompt, signal })) {
 					if (!cancelled) {
 						requestAnimationFrame(() => handleChange(change))
 					}
@@ -104,7 +106,7 @@ export function useTldrawAiDemo() {
 			if (ai) {
 				const { handleChange } = await ai.generate('')
 
-				const changes = await repeatChangesFromBackend(signal).catch((error) => {
+				const changes = await repeatChangesFromBackend({ signal }).catch((error) => {
 					if (error.name === 'AbortError') {
 						console.error('Cancelled')
 					} else {
@@ -134,10 +136,13 @@ export function useTldrawAiDemo() {
 	return { prompt, stream, repeat }
 }
 
-async function getChangesFromBackend(
-	prompt: TLAiSerializedPrompt,
+async function getChangesFromBackend({
+	prompt,
+	signal,
+}: {
+	prompt: TLAiSerializedPrompt
 	signal: AbortSignal
-): Promise<TLAiChange[]> {
+}): Promise<TLAiChange[]> {
 	const res = await fetch(`${process.env.VITE_AI_SERVER_URL}/generate`, {
 		method: 'POST',
 		body: JSON.stringify(prompt),
@@ -154,7 +159,11 @@ async function getChangesFromBackend(
 	return result.changes
 }
 
-async function repeatChangesFromBackend(signal: AbortSignal): Promise<TLAiChange[]> {
+async function repeatChangesFromBackend({
+	signal,
+}: {
+	signal: AbortSignal
+}): Promise<TLAiChange[]> {
 	const res = await fetch(`${process.env.VITE_AI_SERVER_URL}/repeat`, {
 		method: 'POST',
 		body: JSON.stringify(prompt),
@@ -166,15 +175,16 @@ async function repeatChangesFromBackend(signal: AbortSignal): Promise<TLAiChange
 
 	const result: TLAiResult = await res.json()
 
-	console.log(result)
-
 	return result.changes
 }
 
-async function* streamChangesFromBackend(
-	prompt: TLAiSerializedPrompt,
+async function* streamChangesFromBackend({
+	prompt,
+	signal,
+}: {
+	prompt: TLAiSerializedPrompt
 	signal: AbortSignal
-): AsyncGenerator<TLAiChange> {
+}): AsyncGenerator<TLAiChange> {
 	const res = await fetch(`${process.env.VITE_AI_SERVER_URL}/stream`, {
 		method: 'POST',
 		body: JSON.stringify(prompt),
