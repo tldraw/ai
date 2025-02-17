@@ -32,8 +32,9 @@ jq '
     .exports = {
         ".": {
             "import": "./dist/esm/index.mjs",
-            "require": "./dist/cjs/index.js"
+            "require": "./dist/cjs/index.js",
+            "types": "./dist/types/index.d.ts"
         }
     } |
-    .files = ["dist", "src"]
+    .files = ["dist", "src", "README.md"]
 ' package.json.bak > package.json
