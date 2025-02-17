@@ -1,22 +1,26 @@
 {
 	"name": "@tldraw/ai",
-	"version": "0.0.1",
-	"private": true,
+	"version": "0.0.0",
 	"homepage": "https://tldraw.dev",
 	"license": "MIT",
 	"author": {
 		"name": "tldraw GB Ltd.",
 		"email": "hello@tldraw.com"
 	},
+	"scripts": {
+		"prepack": "./scripts/prepack.sh",
+		"postpack": "./scripts/postpack.sh"
+	},
 	"type": "module",
 	"main": "./src/index.ts",
-	"dependencies": {},
 	"devDependencies": {
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
+		"esbuild": "^0.25.0",
 		"react": "catalog:",
 		"react-dom": "catalog:",
-		"tldraw": "catalog:"
+		"tldraw": "catalog:",
+		"typescript": "catalog:"
 	},
 	"peerDependencies": {
 		"react": "catalog:",

@@ -1,5 +1,5 @@
 {
-	"name": "tldraw-ai-example",
+	"name": "tldraw-ai-module",
 	"version": "0.0.1",
 	"private": true,
 	"homepage": "https://tldraw.dev",
@@ -12,7 +12,7 @@
 	"scripts": {
 		"types": "tsc -b tsconfig.json",
 		"types:watch": "tsc -b tsconfig.json --watch",
-		"dev": "pnpm run --filter ./example dev"
+		"dev": "./example/scripts/dev.sh"
 	},
 	"devDependencies": {
 		"@types/node": "^22.10.5",
@@ -23,7 +23,7 @@
 		"eslint-plugin-react-refresh": "^0.4.13",
 		"prettier": "^3.5.1",
 		"prettier-plugin-organize-imports": "^4.1.0",
-		"typescript": "^5.0.2"
+		"typescript": "catalog:"
 	},
 	"packageManager": "pnpm@10.4.1+sha256.4b702887986995933d4300836b04d6d02a43bc72b52e4f7e93a4ca608b959197"
 }

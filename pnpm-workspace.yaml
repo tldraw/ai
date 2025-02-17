@@ -9,3 +9,4 @@ catalog:
   react-dom: ^18.2.0
   tldraw: ^3.8.0
   '@tldraw/tlschema': ^3.8.0
+  typescript: ^5.7.3
