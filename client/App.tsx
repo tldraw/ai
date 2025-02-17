@@ -1,6 +1,6 @@
 import { FormEvent, FormEventHandler, useCallback, useEffect, useState } from 'react'
 import { DefaultSpinner, preventDefault, TLComponents, Tldraw, useEditor, useValue } from 'tldraw'
-import { useTldrawAiDemo } from './demo/useTldrawAiDemo'
+import { useTldrawAiExample } from './example/useTldrawAiExample'
 
 const components: TLComponents = {
 	InFrontOfTheCanvas: () => {
@@ -65,30 +65,13 @@ function ContextBoundsHelper() {
 function InputPromptHelper() {
 	const editor = useEditor()
 
-	const { prompt, stream, repeat } = useTldrawAiDemo()
+	const { prompt, stream, repeat } = useTldrawAiExample()
 
 	useEffect(() => {
 		;(window as any).editor = editor
 		;(window as any).prompt = (str: string) => prompt(str)
 		;(window as any).stream = (str: string) => stream(str)
 		;(window as any).repeat = () => repeat()
-
-		// let cancelled = false
-		// async function _promptAfterOneSecond() {
-		// 	await sleep(2000)
-		// 	if (cancelled) return
-		// 	console.log('prompting')
-		// 	await prompt(
-		// 		'you are an autocomplete bot for my wireframe design bot. take the next three actions that you think that I am going to draw in this user interface wireframe. Incorporate visual feedback about what you see in the existing wireframe. Feel free to clean things up or reposition things if you think it will help.'
-		// 	)
-		// 	if (!cancelled) _promptAfterOneSecond()
-		// }
-		// for shitty autocomplete...
-		// promptAfterOneSecond()
-		// for shitty requests, use the console
-		// return () => {
-		// 	cancelled = true
-		// }
 	}, [prompt])
 
 	const [state, setState] = useState<

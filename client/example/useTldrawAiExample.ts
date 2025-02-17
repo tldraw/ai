@@ -5,7 +5,7 @@ import { ShapeDescriptions } from './transforms/ShapeDescriptions'
 import { SimpleCoordinates } from './transforms/SimpleCoordinates'
 import { SimpleIds } from './transforms/SimpleIds'
 
-export function useTldrawAiDemo() {
+export function useTldrawAiExample() {
 	const ai = useTldrawAi({
 		transforms: [SimpleIds, ShapeDescriptions, SimpleCoordinates],
 	})

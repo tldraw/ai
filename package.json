@@ -1,7 +1,7 @@
 {
-	"name": "tldraw-vite-example",
+	"name": "tldraw-ai-example",
 	"private": true,
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"author": {
 		"name": "tldraw GB Ltd.",
 		"email": "hello@tldraw.com"
