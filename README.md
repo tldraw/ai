@@ -154,7 +154,7 @@ const MY_STATIC_CONFIG: TldrawAiOptions = {
 }
 ```
 
-When the user creates a new prompt, the ai module will create a new instance of each transform to be used for that prompt only. This means that you can stash whatever data you wish on the instance. See the examples in `example/client/transforms` for reference.
+When the user creates a new prompt, the ai module will create a new instance of each transform to be used for that prompt only. This means that you can stash whatever data you wish on the instance. See the examples in `example/client/transforms` as a reference.
 
 ### The hooks
 
@@ -172,7 +172,7 @@ The package exports a hook, `useTldrawAiModule`, that creates an instance of the
 
 #### `useTldrawAi`
 
-The `useTldrawAi` hook adds an extra layer of convenience around the ai module. This hook handles many of the behaviors standard behaviors for you. While we expect to expand this hook to support more configration, you may find it necessary to create your own version of this hook (based on its source code) in order to customize it further.
+The `useTldrawAi` hook adds an extra layer of convenience around the ai module. This hook handles many of the standard behaviors for you. While we expect to expand this hook to support more configration, you may find it necessary to create your own version of this hook (based on its source code) in order to customize it further.
 
 The hook responds with three methods: `prompt`, `repeat`, and `cancel`.
 
@@ -186,7 +186,7 @@ You don't need to define both `generate` and `stream`, though you should define 
 
 **Static configuration**
 
-If you're using the `useTldrawAi` hook, we recommended that you create a custom hook that passes static options to the `useTldrawAi` hook. See the `useTldrawAiExample` hook in our example project as a reference.
+If you're using the `useTldrawAi` hook, we recommend creating a custom hook that passes static options to the `useTldrawAi` hook. See the `useTldrawAiExample` hook in our example project as a reference.
 
 ```ts
 export function useMyCustomAiHook() {
