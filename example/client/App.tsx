@@ -1,12 +1,10 @@
 import { TLComponents, Tldraw } from 'tldraw'
-import { ContextBoundsHelper } from './components/ContextBoundsHelper'
 import { PromptInput } from './components/PromptInput'
 
 const components: TLComponents = {
 	InFrontOfTheCanvas: () => {
 		return (
 			<>
-				<ContextBoundsHelper />
 				<PromptInput />
 			</>
 		)

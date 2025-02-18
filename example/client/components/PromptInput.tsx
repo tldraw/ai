@@ -36,6 +36,7 @@ export function PromptInput() {
 					cancel: (e) => {
 						preventDefault(e)
 						cancel()
+						setState({ name: 'idle' })
 					},
 				})
 
