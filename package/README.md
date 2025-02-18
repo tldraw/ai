@@ -1,13 +1,11 @@
 # tldraw ai module
 
-This repo is meant to help developers build integrations between tldraw's canvas and AI tools. It contains several resources that can be used to get information out of tldraw (in order to prompt a model) and to create changes in tldraw based on some generated instructions.
+Use this package to develop integrations between the [tldraw SDK](https://github.com/tldraw/tldraw) and LLMs. It contains tools to get information out of tldraw (in order to prompt a model) and to apply changes in tldraw based on generated instructions.
 
 - Join the [Discord channel](https://discord.gg/9PSF2C5KgV)
 - Learn more about the [tldraw SDK](https://tldraw.dev)
 
-The module is distributed as an NPM package, [@tldraw/ai](https://www.npmjs.com/package/@tldraw/ai). It is meant to be used together with the [tldraw SDK](https://github.com/tldraw/tldraw).
-
-For full documentation, please see [here](https://github.com/tldraw/ai).
+**[Read the full documentation here.](https://github.com/tldraw/ai)**
 
 ## License
 
@@ -18,6 +16,8 @@ This project is provided under the MIT license found [here](https://github.com/t
 Copyright (c) 2024-present tldraw Inc. The tldraw name and logo are trademarks of tldraw. Please see our [trademark guidelines](https://github.com/tldraw/tldraw/blob/main/TRADEMARKS.md) for info on acceptable usage.
 
 ## Distributions
+
+The module is distributed as an NPM package, [@tldraw/ai](https://www.npmjs.com/package/@tldraw/ai). It is meant to be used together with the [tldraw SDK](https://github.com/tldraw/tldraw).
 
 You can find tldraw on npm [here](https://www.npmjs.com/package/@tldraw/tldraw?activeTab=versions).
 
