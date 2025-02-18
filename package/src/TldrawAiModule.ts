@@ -1,7 +1,7 @@
 import { Box, Editor, FileHelpers, TLShapePartial } from 'tldraw'
 import { TldrawAiTransformConstructor } from './TldrawAiTransform'
 import { TLAiChange, TLAiContent, TLAiMessage, TLAiMessages, TLAiPrompt } from './types'
-import { exhaustiveSwitchError } from './utils'
+import { asMessage, exhaustiveSwitchError } from './utils'
 
 export interface TldrawAiModuleOptions {
 	editor: Editor
@@ -204,10 +204,4 @@ function roundBox(box: Box) {
 	b.width = Math.round(b.width)
 	b.height = Math.round(b.height)
 	return b
-}
-
-function asMessage(message: TLAiMessages): TLAiMessage[] {
-	if (Array.isArray(message)) return message
-	if (typeof message === 'string') return [{ type: 'text', text: message }]
-	return [message]
 }

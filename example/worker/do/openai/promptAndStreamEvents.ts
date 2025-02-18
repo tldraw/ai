@@ -10,6 +10,7 @@ import {
 import { canvasContentToSimpleContent } from './canvasContentToSimpleContent'
 import { ISimpleEvent, ModelResponse, SimpleEvent } from './schema'
 import { OPENAI_SYSTEM_PROMPT } from './system-prompt'
+import { asMessage } from '@tldraw/ai/src/utils'
 
 /**
  * Prompt the OpenAI model with the given prompt. Stream the events as they come back.
@@ -152,7 +153,7 @@ function buildUserMessages(prompt: TLAiSerializedPrompt) {
 		text: `Using the events provided in the response schema, here's what I want you to do:`,
 	})
 
-	for (const message of prompt.message) {
+	for (const message of asMessage(prompt.message)) {
 		if (message.type === 'image') {
 			userMessage.content.push({
 				type: 'image_url',
