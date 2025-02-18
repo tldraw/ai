@@ -68,7 +68,7 @@ export function PromptInput() {
 					state.name === 'idle' ? handleSubmit : state.name === 'loading' ? state.cancel : undefined
 				}
 			>
-				<input name="input" type="text" autoComplete="off" />
+				<input name="input" type="text" autoComplete="off" placeholder="Enter your prompt…" />
 				<button>{state.name === 'loading' ? <DefaultSpinner /> : 'Send'}</button>
 			</form>
 		</div>
