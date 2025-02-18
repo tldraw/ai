@@ -5,9 +5,9 @@ This repo is meant to help developers build integrations between tldraw's canvas
 - Join the [Discord channel](https://discord.gg/9PSF2C5KgV)
 - Learn more about the [tldraw SDK](https://tldraw.dev)
 
-The module is distributed as an NPM package, [@tldraw/ai](https://www.npmjs.com/package/@tldraw/ai). It is meant to be used together with the [tldraw SDK](https://github.com/tldraw/tldraw).
-
 The best way to get started is to clone this repository and experiment with its example project.
+
+The module is also distributed as an NPM package, [@tldraw/ai](https://www.npmjs.com/package/@tldraw/ai). It is meant to be used together with the [tldraw SDK](https://www.npmjs.com/package/tldraw).
 
 ## Local development
 
@@ -31,14 +31,14 @@ npm install -g corepack@latest
 pnpm i
 ```
 
-4. Create a `.dev.vars` file in the **example** directory. Add any environment variables required by the server to the `.dev.vars` file. By default, our example project requires an [OpenAI API Key](https://platform.openai.com/settings/organization/api-keys) so your `.dev.vars` file should look something like this:
+4. Create a `/example/.dev.vars` file. Add any environment variables required by the server to the `/example/.dev.vars` file. By default, our example project requires an [OpenAI API Key](https://platform.openai.com/settings/organization/api-keys) so your `/example/.dev.vars` file should look something like this:
 
 ```
 OPENAI_API_KEY=sk-proj-rest-of-your-key
 ANY_OTHER_KEY_YOU_ARE_USING=here
 ```
 
-If you need to use public-friendly API keys on the frontend, create a `.env` file in the **example** directory and put them there. See [this guide](https://vite.dev/guide/env-and-mode) for more information about environment variables in Vite.
+If you need to use public-friendly API keys on the frontend, create a `/example/.env` file and put them there. See [this guide](https://vite.dev/guide/env-and-mode) for more information about environment variables in Vite.
 
 ```
 VITE_LEAKABLE_OPENAI_API_KEY=sk-proj-rest-of-your-key
