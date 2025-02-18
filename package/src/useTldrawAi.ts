@@ -172,7 +172,7 @@ export function useTldrawAi(opts: TldrawAiOptions) {
 				cancel: rCancelFunction.current,
 			}
 		},
-		[ai]
+		[ai, generateFn, streamFn]
 	)
 
 	/**
@@ -191,8 +191,8 @@ export function useTldrawAi(opts: TldrawAiOptions) {
 			}
 
 			// Repeat the previous arguments and changes
-			const opts = rPreviousArguments.current
-			const { handleChange } = await ai.generate(opts)
+			const prevOpts = rPreviousArguments.current
+			const { handleChange } = await ai.generate(prevOpts)
 			editor.run(
 				() => {
 					for (const change of rPreviousChanges.current) {

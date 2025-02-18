@@ -80,21 +80,23 @@ function App() {
 	)
 }
 
+const TLDRAW_AI_OPTIONS = {
+	transforms: [],
+	generate: async ({ editor, prompt, signal }) => {
+		// todo, return changes
+		return []
+	},
+	stream: async function* ({ editor, prompt, signal }) {
+		// todo, yield each change as it is ready
+	},
+}
+
 function MyPromptUi() {
-	const ai = useTldrawAi({
-		transforms: [],
-		generate: async ({ editor, prompt, signal }) => {
-			// todo, return changes
-			return []
-		},
-		stream: async function* ({ editor, prompt, signal }) {
-			// todo, yield each change as it is ready
-		},
-	})
+	const ai = useTldrawAi(TLDRAW_AI_OPTIONS)
 
 	return (
 		<div style={{ position: 'fixed', bottom: 100, left: 16 }}>
-			<button onClick={() => ai.stream('draw a unicorn')}>Unicorn</button>
+			<button onClick={() => ai.prompt('draw a unicorn')}>Unicorn</button>
 		</div>
 	)
 }
@@ -170,6 +172,16 @@ The package exports a hook, `useTldrawAiModule`, that creates an instance of the
 
 The `useTldrawAi` hook adds an extra layer of convenience around the ai module. This hook handles many of the behaviors standard behaviors for you. While we expect to expand this hook to support more configration, you may find it necessary to create your own version of this hook (based on its source code) in order to customize it further.
 
+The hook responds with three methods: `prompt`, `repeat`, and `cancel`.
+
+- `prompt` accepts either a string or a configuration object with `messages` and `stream`. By default, the `prompt` method will call your configuration's `generate` method. If `stream` is true, then it will call your configuration's `stream` method.
+- `cancel` will cancel any currently running generation.
+- `repeat` will apply the same changes that were generated last time. This is useful for debugging.
+
+**Generate vs. Stream**
+
+You don't need to define both `generate` and `stream`, though you should define one of them. If you call `ai.prompt` with the `stream` flag set to true, but don't have `stream` implemented, then you'll get an error; likewise, if you call `ai.prompt` without the `stream` flag and without `generate`, then you'll get an error. Just be sure to implement one or both.
+
 **Static configuration**
 
 If you're using the `useTldrawAi` hook, we recommended that you create a custom hook that passes static options to the `useTldrawAi` hook. See the `useTldrawAiExample` hook in our example project as a reference.
@@ -229,10 +241,10 @@ function App() {
 }
 
 function MyPromptUi() {
-	const ai = useTldrawAiExample()
+	const ai = useMyCustomAiHook()
 	return (
 		<div style={{ position: 'fixed', bottom: 100, left: 16 }}>
-			<button onClick={() => ai.stream('draw a unicorn')}>Unicorn</button>
+			<button onClick={() => ai.prompt('draw a unicorn')}>Unicorn</button>
 		</div>
 	)
 }
@@ -243,10 +255,10 @@ Or via the Tldraw component's `components` prop:
 ```tsx
 const components: TLComponents = {
 	InFrontOfTheCanvas: () => {
-		const ai = useTldrawAiExample()
+		const ai = useMyCustomAiHook()
 		return (
 			<div>
-				<button onClick={() => ai.stream('draw a unicorn')}>Unicorn</button>
+				<button onClick={() => ai.prompt('draw a unicorn')}>Unicorn</button>
 			</div>
 		)
 	},
@@ -284,10 +296,10 @@ function TldrawBranch({ onMount }: { onMount: (editor: Editor) => void }) {
 }
 
 function MyPromptUi({ editor }: Editor) {
-	const ai = useTldrawAiExample({ editor })
+	const ai = useTldrawAi({ editor, ...MY_STATIC_OPTIONS })
 	return (
 		<div style={{ position: 'fixed', bottom: 100, left: 16 }}>
-			<button onClick={() => ai.stream('draw a unicorn')}>Unicorn</button>
+			<button onClick={() => ai.prompt('draw a unicorn')}>Unicorn</button>
 		</div>
 	)
 }

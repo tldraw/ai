@@ -7,8 +7,6 @@ import { OpenAiService } from './openai/OpenAiService'
 export class TldrawAiDurableObject extends DurableObject<Environment> {
 	service: OpenAiService
 
-	prevResponse = null as null | TLAiResult
-
 	constructor(ctx: DurableObjectState, env: Environment) {
 		super(ctx, env)
 		this.service = new OpenAiService(this.env)
@@ -22,7 +20,6 @@ export class TldrawAiDurableObject extends DurableObject<Environment> {
 	})
 		// when we get a connection request, we stash the room id if needed and handle the connection
 		.post('/generate', (request) => this.generate(request))
-		.post('/repeat', (request) => this.repeat(request))
 		.post('/stream', (request) => this.stream(request))
 		.post('/cancel', (request) => this.cancel(request))
 
@@ -44,24 +41,6 @@ export class TldrawAiDurableObject extends DurableObject<Environment> {
 	}
 
 	/**
-	 * Repeat the last response.
-	 *
-	 * @param _request - The request object containing the prompt.
-	 * @returns A Promise that resolves to a Response object containing the repeated response.
-	 */
-	private async repeat(_request: Request) {
-		if (this.prevResponse) {
-			return new Response(JSON.stringify(this.prevResponse), {
-				headers: { 'Content-Type': 'application/json' },
-			})
-		}
-
-		return new Response('No previous response', {
-			status: 404,
-		})
-	}
-
-	/**
 	 * Generate a set of changes from the model.
 	 *
 	 * @param request - The request object containing the prompt.
@@ -72,8 +51,6 @@ export class TldrawAiDurableObject extends DurableObject<Environment> {
 
 		try {
 			const response = await this.service.generate(prompt)
-
-			this.prevResponse = response
 
 			// Send back the response as a JSON object
 			return new Response(JSON.stringify(response), {
@@ -115,8 +92,6 @@ export class TldrawAiDurableObject extends DurableObject<Environment> {
 				await writer.abort(error)
 			}
 		})()
-
-		this.prevResponse = response
 
 		return new Response(readable, {
 			headers: {
