@@ -160,7 +160,7 @@ export function useTldrawAi(opts: TldrawAiOptions) {
 
 			rCancelFunction.current = () => {
 				cancelled = true
-				controller.abort()
+				controller.abort('Cancelled by user')
 				editor.bailToMark(markId) // ? should we bail on cancels or preserve the generated items so far?
 				rCancelFunction.current = null
 			}

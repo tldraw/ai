@@ -36,6 +36,7 @@ export function PromptInput() {
 					cancel: (e) => {
 						preventDefault(e)
 						cancel()
+						setState({ name: 'idle' })
 					},
 				})
 
@@ -45,8 +46,8 @@ export function PromptInput() {
 				// Set the state back to idle
 				setState({ name: 'idle' })
 			} catch (e: any) {
-				console.log(e)
 				console.error(e)
+				setState({ name: 'idle' })
 			}
 		},
 		[prompt]

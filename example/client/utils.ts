@@ -26,30 +26,27 @@ export const Result = {
 /** @internal */
 export function exhaustiveSwitchError(value: never, property?: string): never {
 	const debugValue =
-		property && value && typeof value === 'object' && property in value
-			? value[property]
-			: value
+		property && value && typeof value === 'object' && property in value ? value[property] : value
 	throw new Error(`Unknown switch case ${debugValue}`)
 }
 
 /** @internal */
-export const assert: (value: unknown, message?: string) => asserts value =
-	omitFromStackTrace((value, message) => {
+export const assert: (value: unknown, message?: string) => asserts value = omitFromStackTrace(
+	(value, message) => {
 		if (!value) {
 			throw new Error(message || 'Assertion Error')
 		}
-	})
-
-/** @internal */
-export const assertExists = omitFromStackTrace(
-	<T>(value: T, message?: string): NonNullable<T> => {
-		// note that value == null is equivalent to value === null || value === undefined
-		if (value == null) {
-			throw new Error(message ?? 'value must be defined')
-		}
-		return value as NonNullable<T>
 	}
 )
+
+/** @internal */
+export const assertExists = omitFromStackTrace(<T>(value: T, message?: string): NonNullable<T> => {
+	// note that value == null is equivalent to value === null || value === undefined
+	if (value == null) {
+		throw new Error(message ?? 'value must be defined')
+	}
+	return value as NonNullable<T>
+})
 
 /** @internal */
 export function promiseWithResolve<T>(): Promise<T> & {
@@ -148,9 +145,7 @@ function useIdentity<T>(value: T, isEqual: (a: T, b: T) => boolean): T {
 }
 
 /** @internal */
-export function useShallowObjectIdentity<T extends object | null | undefined>(
-	obj: T
-): T {
+export function useShallowObjectIdentity<T extends object | null | undefined>(obj: T): T {
 	return useIdentity(obj, areNullableObjectsShallowEqual)
 }
 
@@ -170,10 +165,7 @@ const areNullableObjectsShallowEqual = (
 }
 
 /** @internal */
-export function areObjectsShallowEqual<T extends object>(
-	obj1: T,
-	obj2: T
-): boolean {
+export function areObjectsShallowEqual<T extends object>(obj1: T, obj2: T): boolean {
 	if (obj1 === obj2) return true
 	const keys1 = new Set(Object.keys(obj1))
 	const keys2 = new Set(Object.keys(obj2))
@@ -183,4 +175,19 @@ export function areObjectsShallowEqual<T extends object>(
 		if (!Object.is((obj1 as any)[key], (obj2 as any)[key])) return false
 	}
 	return true
+}
+
+import { uniqueId } from 'tldraw'
+
+export function getLocalUserId() {
+	let localUserId = uniqueId()
+
+	const localUserIdInLocalStorage = localStorage.getItem('localUserId')
+	if (localUserIdInLocalStorage) {
+		localUserId = localUserIdInLocalStorage
+	} else {
+		localStorage.setItem('localUserId', localUserId)
+	}
+
+	return localUserId
 }
