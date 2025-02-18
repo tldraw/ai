@@ -29,28 +29,27 @@ export type TLAiMessages = string | TLAiMessage | TLAiMessage[]
  * A prompt with information from the editor.
  */
 export interface TLAiPrompt {
-	// The user's written prompt
-	message: TLAiMessage[]
-	// A screenshot
+	/** The user's written prompt or an array of messages */
+	message: string | TLAiMessage[]
+	/** A screenshot */
 	image?: string
-	// The content pulled from the editor
+	/** The content pulled from the editor */
 	canvasContent: TLAiContent
-	// The bounds of the context in the editor
+	/** The bounds of the context in the editor */
 	contextBounds: Box
-	// The bounds of the prompt in the editor
+	/** The bounds of the prompt in the editor */
 	promptBounds: Box
+	/** Any additional information. Must be JSON serializable! */
+	meta?: any
 }
 
-export interface TLAiSerializedPrompt {
-	// The user's written prompt
-	message: TLAiMessage[]
-	// A screenshot
-	image?: string
-	// The content pulled from the editor
-	canvasContent: TLAiContent
-	// The bounds of the context in the editor
+/**
+ * A prompt with information from the editor, serialized to JSON.
+ */
+export interface TLAiSerializedPrompt extends Omit<TLAiPrompt, 'contextBounds' | 'promptBounds'> {
+	/** The bounds of the context in the editor */
 	contextBounds: BoxModel
-	// The bounds of the prompt in the editor
+	/** The bounds of the prompt in the editor */
 	promptBounds: BoxModel
 }
 

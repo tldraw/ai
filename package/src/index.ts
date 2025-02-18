@@ -1,6 +1,12 @@
 // The parts of the module that are designed to run on the client.
 
-export { TldrawAiManager } from './TldrawAiManager'
-export { TldrawAiTransform } from './TldrawAiTransform'
+export { TldrawAiModule, type TldrawAiModuleOptions } from './TldrawAiModule'
+export { TldrawAiTransform, type TldrawAiTransformConstructor } from './TldrawAiTransform'
 export * from './types'
-export { useTldrawAi } from './useTldrawAi'
+export {
+	useTldrawAi,
+	type TldrawAiGenerateFn,
+	type TldrawAiOptions,
+	type TldrawAiPromptOptions,
+	type TldrawAiStreamFn,
+} from './useTldrawAi'
