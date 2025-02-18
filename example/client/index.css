@@ -18,12 +18,17 @@ body {
 	align-items: center;
 	justify-content: center;
 	padding: 0px 8px;
+	z-index: 100;
 }
 
 .prompt-input form {
 	display: flex;
 	padding: 8px;
 	gap: 8px;
+	pointer-events: all;
+	background-color: var(--color-panel);
+	border-radius: 8px;
+	box-shadow: var(--shadow-1);
 }
 
 .prompt-input input[type='text'] {

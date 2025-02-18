@@ -29,14 +29,14 @@ npm install -g corepack@latest
 pnpm i
 ```
 
-3. Create a `.dev.vars` file in the root directory. Add any environment variables required by the server to the `.dev.vars` file. By default, our example project requires an [OpenAI API Key](https://platform.openai.com/settings/organization/api-keys) so your `.dev.vars` file should look something like this:
+1. Create a `.dev.vars` file in the **example** directory. Add any environment variables required by the server to the `.dev.vars` file. By default, our example project requires an [OpenAI API Key](https://platform.openai.com/settings/organization/api-keys) so your `.dev.vars` file should look something like this:
 
 ```
 OPENAI_API_KEY=sk-proj-rest-of-your-key
 ANY_OTHER_KEY_YOU_ARE_USING=here
 ```
 
-If you need public-friendly API keys on the frontend, create a `.env` file in the root directory and put them there. See [this guide](https://vite.dev/guide/env-and-mode) for more information about environment variables in Vite.
+If you need to use public-friendly API keys on the frontend, create a `.env` file in the **example** directory and put them there. See [this guide](https://vite.dev/guide/env-and-mode) for more information about environment variables in Vite.
 
 ```
 VITE_LEAKABLE_OPENAI_API_KEY=sk-proj-rest-of-your-key
