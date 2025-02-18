@@ -64,7 +64,6 @@ export class SimpleIds extends TldrawAiTransform {
 
 				binding = this.collectAllIdsRecursively(change.binding, this.writeOriginalIds)
 
-				console.log(binding)
 				return {
 					...change,
 					binding,

@@ -14,7 +14,7 @@ export class TldrawAiDurableObject extends DurableObject<Environment> {
 
 	private readonly router = AutoRouter({
 		catch: (e) => {
-			console.log(e)
+			console.error(e)
 			return error(e)
 		},
 	})
