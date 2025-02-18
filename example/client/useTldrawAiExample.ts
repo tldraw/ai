@@ -1,5 +1,5 @@
 import { TLAiChange, TLAiPrompt, TLAiResult, TLAiSerializedPrompt, useTldrawAi } from '@tldraw/ai'
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 import { ShapeDescriptions } from './transforms/ShapeDescriptions'
 import { SimpleCoordinates } from './transforms/SimpleCoordinates'
 import { SimpleIds } from './transforms/SimpleIds'
@@ -9,8 +9,10 @@ export function useTldrawAiExample() {
 		transforms: [SimpleIds, ShapeDescriptions, SimpleCoordinates],
 	})
 
+	let rCancelFunction = useRef<(() => void) | null>(null)
+
 	const prompt = useCallback(
-		(message: TLAiPrompt['message']) => {
+		(message: string | { message: TLAiPrompt['message']; stream?: boolean }) => {
 			let cancelled = false
 			const controller = new AbortController()
 			const signal = controller.signal
@@ -42,16 +44,20 @@ export function useTldrawAiExample() {
 				}
 
 				resolve()
+				rCancelFunction.current = null
 			})
+
+			rCancelFunction.current = () => {
+				cancelled = true
+				controller.abort()
+				rCancelFunction.current = null
+			}
 
 			return {
 				// the promise that will resolve the changes
 				promise,
 				// a helper to cancel the request
-				cancel: () => {
-					cancelled = true
-					controller.abort()
-				},
+				cancel: rCancelFunction.current,
 			}
 		},
 		[ai]
@@ -81,16 +87,20 @@ export function useTldrawAiExample() {
 				}
 
 				resolve()
+				rCancelFunction.current = null
 			})
+
+			rCancelFunction.current = () => {
+				cancelled = true
+				controller.abort()
+				rCancelFunction.current = null
+			}
 
 			return {
 				// the promise that will resolve the changes
 				promise,
 				// a helper to cancel the request
-				cancel: () => {
-					cancelled = true
-					controller.abort()
-				},
+				cancel: rCancelFunction.current,
 			}
 		},
 		[ai]
@@ -121,18 +131,26 @@ export function useTldrawAiExample() {
 			}
 
 			resolve()
+			rCancelFunction.current = null
 		})
+
+		rCancelFunction.current = () => {
+			cancelled = true
+			controller.abort()
+			rCancelFunction.current = null
+		}
 
 		return {
 			promise,
-			cancel: () => {
-				cancelled = true
-				controller.abort()
-			},
+			cancel: rCancelFunction.current,
 		}
 	}, [ai])
 
-	return { prompt, stream, repeat }
+	const cancel = useCallback(() => {
+		rCancelFunction.current?.()
+	}, [])
+
+	return { prompt, stream, repeat, cancel }
 }
 
 async function getChangesFromBackend({

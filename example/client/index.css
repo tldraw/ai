@@ -5,3 +5,35 @@ body {
 	font-family: 'Inter', sans-serif;
 	overscroll-behavior: none;
 }
+
+/* Prompt input */
+
+.prompt-input {
+	position: absolute;
+	bottom: 100px;
+	left: 0;
+	width: 100%;
+	pointer-events: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0px 8px;
+}
+
+.prompt-input form {
+	display: flex;
+	padding: 8px;
+	gap: 8px;
+}
+
+.prompt-input input[type='text'] {
+	width: 240px;
+	max-width: 100%;
+	height: 36px;
+	padding: 2px 8px;
+}
+
+.prompt-input button {
+	width: 64px;
+	height: 36px;
+}

@@ -24,17 +24,18 @@ export class TldrawAiManager {
 	 * Creates and prepare a prompt, returning the prompt
 	 * and a function to handle changes.
 	 *
-	 * @param message The user's message
+	 * @param prompt The user's message or a configuration for the prompt
 	 */
-	async generate(message: TLAiPrompt['message']) {
+	async generate(prompt: string | { message: TLAiPrompt['message']; stream?: boolean }) {
 		const { transforms: _transformCtors = [] } = this.options
 		const transforms = _transformCtors.map((ctor) => new ctor(this.editor))
 
-		let prompt = await this.getPrompt(message)
+		const message = typeof prompt === 'string' ? prompt : prompt.message
+		let _prompt = await this.getPrompt(message)
 
 		for (const transform of transforms) {
 			if (transform.transformPrompt) {
-				prompt = transform.transformPrompt(prompt)
+				_prompt = transform.transformPrompt(_prompt)
 			}
 		}
 
@@ -58,7 +59,7 @@ export class TldrawAiManager {
 		}
 
 		return {
-			prompt,
+			prompt: _prompt,
 			handleChange,
 			handleChanges,
 		}
