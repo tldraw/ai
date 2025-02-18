@@ -11,8 +11,9 @@ type PromptInputState =
 			cancel: (e: FormEvent<HTMLFormElement>) => void
 	  }
 
-export function PromptInput({ ai }: { ai: ReturnType<typeof useTldrawAiExample> }) {
+export function PromptInput() {
 	const editor = useEditor()
+	const ai = useTldrawAiExample()
 
 	// The state of the prompt input, either idle or loading with a cancel callback
 	const [state, setState] = useState<PromptInputState>({ name: 'idle' })
