@@ -1,6 +1,13 @@
-# tldraw's ai module
+# tldraw ai module
 
-This repo is meant to help developers build integrations between tldraw's canvas and external LLMs or other AI tools. It contains several resources that can be used to get information out of tldraw (in order to prompt a model) and to create changes in tldraw based on some generated instructions.
+This repo is meant to help developers build integrations between tldraw's canvas and AI tools. It contains several resources that can be used to get information out of tldraw (in order to prompt a model) and to create changes in tldraw based on some generated instructions.
+
+- Join the [Discord channel](https://discord.gg/9PSF2C5KgV)
+- Learn more about the [tldraw SDK](https://tldraw.dev)
+
+The module is distributed as an NPM package, [@tldraw/ai](https://www.npmjs.com/package/@tldraw/ai). It is meant to be used together with the [tldraw SDK](https://github.com/tldraw/tldraw).
+
+For full documentation, please see [here](https://github.com/tldraw/ai).
 
 ## License
 

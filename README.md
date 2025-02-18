@@ -1,4 +1,4 @@
-# tldraw's ai module
+# tldraw ai module
 
 This repo is meant to help developers build integrations between tldraw's canvas and AI tools. It contains several resources that can be used to get information out of tldraw (in order to prompt a model) and to create changes in tldraw based on some generated instructions.
 
@@ -17,19 +17,21 @@ This repository is a pnpm monorepo. It has three parts:
 - `/example/client` contains the example's frontend (a Vite app)
 - `/example/worker` contains the example's backend (a Cloudflare Worker)
 
-1. Install the latest version of corepack.
+1. Clone this repository.
+
+2. Install the latest version of corepack.
 
 ```bash
 npm install -g corepack@latest
 ```
 
-2. Install dependencies using [pnpm](https://pnpm.io/).
+3. Install dependencies using [pnpm](https://pnpm.io/).
 
 ```bash
 pnpm i
 ```
 
-1. Create a `.dev.vars` file in the **example** directory. Add any environment variables required by the server to the `.dev.vars` file. By default, our example project requires an [OpenAI API Key](https://platform.openai.com/settings/organization/api-keys) so your `.dev.vars` file should look something like this:
+4. Create a `.dev.vars` file in the **example** directory. Add any environment variables required by the server to the `.dev.vars` file. By default, our example project requires an [OpenAI API Key](https://platform.openai.com/settings/organization/api-keys) so your `.dev.vars` file should look something like this:
 
 ```
 OPENAI_API_KEY=sk-proj-rest-of-your-key
@@ -43,13 +45,13 @@ VITE_LEAKABLE_OPENAI_API_KEY=sk-proj-rest-of-your-key
 VITE_SOME_PUBLIC_KEY=sk-proj-rest-of-your-key
 ```
 
-3. Start the development server.
+5. Start the development server.
 
 ```bash
 pnpm run dev
 ```
 
-4. Open [localhost:5173](http://localhost:5173) in your browser.
+6. Open [localhost:5173](http://localhost:5173) in your browser.
 
 You can now make any changes you wish to the example project.
 
@@ -57,7 +59,7 @@ You can now make any changes you wish to the example project.
 
 ## Installation
 
-For production, it's recommended to install the `@tldraw/ai` package in a new repsitory, such as a fork of tldraw's [Vite template](https://github.com/tldraw/vite-template). See the [tldraw repository](https://github.com/tldraw/tldraw) for more resources.
+For production, install the `@tldraw/ai` package in a new repository, such as a fork of tldraw's [Vite template](https://github.com/tldraw/vite-template). See the [tldraw repository](https://github.com/tldraw/tldraw) for more resources.
 
 Install the `@tldraw/ai` package from NPM or your package manager of choice.
 
@@ -125,7 +127,7 @@ You may find that models are bad at generating changes directly. In our example 
 
 ### Transforms
 
-The ai module has support for "transforms". This feature allows you to modify the user's prompt (the data extracted from the canvas) and then use those modifications again later when handling changes. These are useful when preparing the data into a format that is easier for an LLM to work with.
+The ai module has support for "transforms" (`TldrawAiTransform`). This feature allows you to modify the user's prompt (the data extracted from the canvas) and then use those modifications again later when handling changes. These are useful when preparing the data into a format that is easier for an LLM to work with.
 
 Our example project includes several of these. When extracting data from the canvas, `SimpleIds` transform replaces tldraw's regular ids (which look like `shape:some_long_uuid`) with simplified ids (like `1` or `2`). Later, when handling changes, the transform replaces the simplified ids with their original ids (or creates new ones).
 
