@@ -1,4 +1,11 @@
-import { TLAiChange, TLAiPrompt, TLAiResult, TLAiSerializedPrompt, useTldrawAi } from '@tldraw/ai'
+import {
+	TLAiChange,
+	TLAiMessage,
+	TLAiMessages,
+	TLAiResult,
+	TLAiSerializedPrompt,
+	useTldrawAi,
+} from '@tldraw/ai'
 import { useCallback, useRef } from 'react'
 import { ShapeDescriptions } from './transforms/ShapeDescriptions'
 import { SimpleCoordinates } from './transforms/SimpleCoordinates'
@@ -12,7 +19,7 @@ export function useTldrawAiExample() {
 	let rCancelFunction = useRef<(() => void) | null>(null)
 
 	const prompt = useCallback(
-		(message: string | { message: TLAiPrompt['message']; stream?: boolean }) => {
+		(message: string | { message: TLAiMessage; stream?: boolean }) => {
 			let cancelled = false
 			const controller = new AbortController()
 			const signal = controller.signal
@@ -64,7 +71,7 @@ export function useTldrawAiExample() {
 	)
 
 	const stream = useCallback(
-		(message: TLAiPrompt['message']) => {
+		(message: TLAiMessages) => {
 			let cancelled = false
 			const controller = new AbortController()
 			const signal = controller.signal
@@ -72,7 +79,7 @@ export function useTldrawAiExample() {
 			const promise = new Promise<void>(async (resolve, reject) => {
 				if (!ai) reject()
 
-				const { prompt, handleChange } = await ai.generate(message)
+				const { prompt, handleChange } = await ai.generate({ message })
 
 				const serializedPrompt: TLAiSerializedPrompt = {
 					...prompt,

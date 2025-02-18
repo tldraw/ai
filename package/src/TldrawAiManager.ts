@@ -1,6 +1,6 @@
 import { Box, Editor, FileHelpers, TLShapePartial } from 'tldraw'
 import { TldrawAiTransformConstructor } from './TldrawAiTransform'
-import { TLAiChange, TLAiContent, TLAiPrompt } from './types'
+import { TLAiChange, TLAiContent, TLAiMessage, TLAiMessages, TLAiPrompt } from './types'
 import { exhaustiveSwitchError } from './utils'
 
 export interface TldrawAiManagerOptions {
@@ -26,7 +26,7 @@ export class TldrawAiManager {
 	 *
 	 * @param prompt The user's message or a configuration for the prompt
 	 */
-	async generate(prompt: string | { message: TLAiPrompt['message']; stream?: boolean }) {
+	async generate(prompt: string | { message: TLAiMessages; stream?: boolean }) {
 		const { transforms: _transformCtors = [] } = this.options
 		const transforms = _transformCtors.map((ctor) => new ctor(this.editor))
 
@@ -116,7 +116,7 @@ export class TldrawAiManager {
 	 * @param options Options to generate the input
 	 */
 	async getPrompt(
-		prompt: TLAiPrompt['message'],
+		prompt: TLAiMessages,
 		options = {} as Partial<Pick<TLAiPrompt, 'canvasContent' | 'contextBounds' | 'promptBounds'>>
 	): Promise<TLAiPrompt> {
 		const { editor } = this
@@ -131,7 +131,7 @@ export class TldrawAiManager {
 		const image = await this.getImage(content)
 
 		return {
-			message: prompt,
+			message: asMessage(prompt),
 			canvasContent: content,
 			contextBounds: roundBox(contextBounds),
 			promptBounds: roundBox(promptBounds),
@@ -206,4 +206,10 @@ function roundBox(box: Box) {
 	b.width = Math.round(b.width)
 	b.height = Math.round(b.height)
 	return b
+}
+
+function asMessage(message: TLAiMessages): TLAiMessage[] {
+	if (Array.isArray(message)) return message
+	if (typeof message === 'string') return [{ type: 'text', text: message }]
+	return [message]
 }

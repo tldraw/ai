@@ -17,7 +17,7 @@ export function useSomeOtherBackend() {
 
 			const promise = new Promise<void>(async (resolve, reject) => {
 				if (!ai) reject()
-				const { prompt, handleChange } = await ai.generate(message)
+				const { prompt, handleChange } = await ai.generate({ message })
 
 				const serializedPrompt: TLAiSerializedPrompt = {
 					...prompt,
@@ -66,7 +66,7 @@ export function useSomeOtherBackend() {
 			const promise = new Promise<void>(async (resolve, reject) => {
 				if (!ai) reject()
 
-				const { prompt, handleChange } = await ai.generate(message)
+				const { prompt, handleChange } = await ai.generate({ message })
 
 				const serializedPrompt: TLAiSerializedPrompt = {
 					...prompt,

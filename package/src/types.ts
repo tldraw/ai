@@ -10,23 +10,27 @@ import type {
 	TLShapePartial,
 } from 'tldraw'
 
-type TLAiMessage =
-	| {
-			type: 'text'
-			text: string
-	  }
-	| {
-			type: 'image'
-			mimeType: string
-			src: string
-	  }
+export interface TLAiTextMessage {
+	type: 'text'
+	text: string
+}
+
+export interface TLAiImageMessage {
+	type: 'image'
+	mimeType: string
+	src: string
+}
+
+export type TLAiMessage = TLAiTextMessage | TLAiImageMessage
+
+export type TLAiMessages = string | TLAiMessage | TLAiMessage[]
 
 /**
  * A prompt with information from the editor.
  */
 export interface TLAiPrompt {
 	// The user's written prompt
-	message: string | TLAiMessage[]
+	message: TLAiMessage[]
 	// A screenshot
 	image?: string
 	// The content pulled from the editor
@@ -39,7 +43,7 @@ export interface TLAiPrompt {
 
 export interface TLAiSerializedPrompt {
 	// The user's written prompt
-	message: string | TLAiMessage[]
+	message: TLAiMessage[]
 	// A screenshot
 	image?: string
 	// The content pulled from the editor

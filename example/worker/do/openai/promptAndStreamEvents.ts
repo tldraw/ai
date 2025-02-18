@@ -146,35 +146,26 @@ function buildUserMessages(prompt: TLAiSerializedPrompt) {
 		)
 	}
 
-	// The message can be either text or an array of text and images
-	if (Array.isArray(prompt.message)) {
-		// If it's an array, push each message as a separate message
-		userMessage.content.push({
-			type: 'text',
-			text: `Here's what I want you to do:`,
-		})
+	// If it's an array, push each message as a separate message
+	userMessage.content.push({
+		type: 'text',
+		text: `Using the events provided in the response schema, here's what I want you to do:`,
+	})
 
-		for (const message of prompt.message) {
-			if (message.type === 'image') {
-				userMessage.content.push({
-					type: 'image_url',
-					image_url: {
-						url: message.src!,
-					},
-				})
-			} else {
-				userMessage.content.push({
-					type: 'text',
-					text: message.text,
-				})
-			}
+	for (const message of prompt.message) {
+		if (message.type === 'image') {
+			userMessage.content.push({
+				type: 'image_url',
+				image_url: {
+					url: message.src!,
+				},
+			})
+		} else {
+			userMessage.content.push({
+				type: 'text',
+				text: message.text,
+			})
 		}
-	} else {
-		// If it's just the text, push it as a text message
-		userMessage.content.push({
-			type: 'text',
-			text: `Using the events provided in the response schema, here's what I want you to do:\n\n${prompt.message}`,
-		})
 	}
 
 	return userMessage
