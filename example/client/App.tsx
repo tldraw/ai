@@ -5,7 +5,6 @@ import { useTldrawAiExample } from './useTldrawAiExample'
 
 function App() {
 	const [editor, setEditor] = useState<Editor | null>(null) // [1]
-
 	return (
 		<div className="tldraw-ai-container">
 			<Tldraw persistenceKey="tldraw-ai-demo" onMount={setEditor} />

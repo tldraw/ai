@@ -12,6 +12,7 @@ body {
 	display: grid;
 	grid-template-rows: 1fr 48px;
 }
+
 /* Prompt input */
 
 .prompt-input {
