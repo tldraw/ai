@@ -4,18 +4,19 @@ import { ShapeDescriptions } from './transforms/ShapeDescriptions'
 import { SimpleCoordinates } from './transforms/SimpleCoordinates'
 import { SimpleIds } from './transforms/SimpleIds'
 
+/**
+ * A hook that calls `useTldrawAi` with static options.
+ *
+ * @param editor - (optional) The editor instance to use. If not provided, the hook will try to use the editor from React context.
+ */
 export function useTldrawAiExample(editor?: Editor) {
-	return useTldrawAi({ editor, ...options })
+	return useTldrawAi({ editor, ...STATIC_TLDRAWAI_OPTIONS })
 }
 
-// Tip: It's best to define these options outside of any React function. If you do define them inside
-// of a React hook / function, be sure to memoize them correctly with useMemo or useCallback hooks.
-// See documentation in README.md or notes at the bottom of this file.
-
-const options: TldrawAiOptions = {
-	// [1]
+const STATIC_TLDRAWAI_OPTIONS: TldrawAiOptions = {
+	// Transforms that will be applied to the prompt before it's sent and to changes as they're received.
 	transforms: [SimpleIds, ShapeDescriptions, SimpleCoordinates],
-	// [2]
+	// A function that calls the backend and return generated changes. See worker/do/OpenAiService.ts#generate for the backend part.
 	generate: async ({ editor, prompt, signal }) => {
 		const res = await fetch('/generate', {
 			method: 'POST',
@@ -30,7 +31,7 @@ const options: TldrawAiOptions = {
 
 		return result.changes
 	},
-	// [3]
+	// A function similar to `generate` but that will stream changes from the AI as they are ready. See worker/do/OpenAiService.ts#stream for the backend part.
 	stream: async function* ({ editor, prompt, signal }) {
 		const res = await fetch('/stream', {
 			method: 'POST',
@@ -78,18 +79,3 @@ const options: TldrawAiOptions = {
 		}
 	},
 }
-
-/*
-[1]
-All of the transforms that will be applied to the prompt and changes, useful for
-things like normalizing coordinates, adding descriptions, or simplifying IDs
-
-[2]
-A function that return changes. These can be generated locally or on the backend,
-but usually are the result of passing your prompt to a LLM or other model.
-
-[3]
-A function similar to `generate` but that will stream changes from the AI as they are ready.
-You don't need to implement both, you could implement only one or the other depending on
-whether you want to use streaming.
-*/
