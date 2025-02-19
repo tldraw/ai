@@ -21,8 +21,8 @@ function InputBar({ editor }: { editor: Editor }) {
 	// A stashed cancel function that we can call if the user clicks the button while loading
 	const rCancelFn = useRef<(() => void) | null>(null)
 
+	// Put the editor and ai helpers onto the window for debugging. You can run commands like `ai.prompt('draw a unicorn')` in the console.
 	useEffect(() => {
-		// Put the editor and ai helpers onto the window for debugging. You can run commands like `ai.prompt('draw a unicorn')` in the console.
 		if (!editor) return
 		;(window as any).editor = editor
 		;(window as any).ai = ai
@@ -58,9 +58,11 @@ function InputBar({ editor }: { editor: Editor }) {
 
 				// ...then set the state back to idle
 				setIsGenerating(false)
+				rCancelFn.current = null
 			} catch (e: any) {
 				console.error(e)
 				setIsGenerating(false)
+				rCancelFn.current = null
 			}
 		},
 		[prompt]

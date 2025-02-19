@@ -71,10 +71,10 @@ Each event must include:
 - When drawing flow charts or other geometric shapes with labels, they should be at least 200 pixels on any side unless you have a good reason not to.
 - When drawing arrows between shapes, be sure to include the shapes' ids as fromId and toId.
 - Never create an "unknown" type shapes, though you can move unknown shapes if you need to.
-- Did the user ask for labels on their shapes? Did the user ask for a format where labels would be appropriate? If yes, add labels to shapes. If not, do not add labels to shapes. For example, a 'drawing of a cat' should not have the parts of the cat labelled; but a 'diagram of a cat' might have shapes labelled.
 - Text shapes are 32 points tall. Their width will auto adjust based on the text content.
 - Geometric shapes (rectangles, ellipses) are 100x100 by default. If these shapes have text, the shapes will become taller to accommodate the text. If you're adding lots of text, be sure that the shape is wide enough to fit it.
 - Note shapes at 200x200. Notes with more text will be taller in order to fit their text content.
+- Be careful with labels. Did the user ask for labels on their shapes? Did the user ask for a format where labels would be appropriate? If yes, add labels to shapes. If not, do not add labels to shapes. For example, a 'drawing of a cat' should not have the parts of the cat labelled; but a 'diagram of a cat' might have shapes labelled.
 
 # Examples
 
