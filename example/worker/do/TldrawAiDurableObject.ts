@@ -80,6 +80,7 @@ export class TldrawAiDurableObject extends DurableObject<Environment> {
 		;(async () => {
 			try {
 				const prompt = await request.json()
+
 				for await (const change of this.service.stream(prompt as TLAiSerializedPrompt)) {
 					response.changes.push(change)
 					const data = `data: ${JSON.stringify(change)}\n\n`

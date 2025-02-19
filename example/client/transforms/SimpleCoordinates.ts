@@ -1,42 +1,37 @@
 import { TLAiChange, TLAiPrompt, TldrawAiTransform } from '@tldraw/ai'
-import { isPageId } from 'tldraw'
+import { Box, TLShapePartial } from 'tldraw'
 
 export class SimpleCoordinates extends TldrawAiTransform {
-	offset = { x: 0, y: 0 }
 	offsetIds = new Set<string>()
-	adjustments: Record<string, number> = {}
+	before: Record<string, number> = {}
+	bounds = {} as Box
 
 	override transformPrompt = (input: TLAiPrompt) => {
-		const { canvasContent } = input
+		const { canvasContent, promptBounds, contextBounds } = input
+		// Save the original coordinates of context bounds (the user's viewport)
+		this.bounds = contextBounds.clone()
 
+		// Save the original coordinates of all shapes
 		for (const s of canvasContent.shapes) {
 			for (const prop of ['x', 'y'] as const) {
-				s[prop] = Math.floor(s[prop])
-				this.adjustments[s.id + '_' + prop] = s[prop]
+				this.before[s.id + '_' + prop] = s[prop]
+				s[prop] = Math.floor(s[prop] - this.bounds[prop])
 			}
 			for (const key in s.props) {
-				// @ts-expect-error
-				const val = s.props[key]
-				if (Number.isFinite(val)) {
-					;(s.props as any)[key] = Math.floor(val)
-					this.adjustments[s.id + '_' + key] = val
-					;(s.props as any)[key] = Math.floor(val)
+				const v = (s.props as any)[key]
+				if (Number.isFinite(v)) {
+					;(s.props as any)[key] = Math.floor(v)
 				}
 			}
 		}
 
-		canvasContent.shapes = canvasContent.shapes.map((s) => {
-			if (isPageId(s.parentId)) {
-				this.offsetIds.add(s.id)
-				return {
-					...s,
-					x: s.x - this.offset.x,
-					y: s.y - this.offset.y,
-				}
-			} else {
-				return s
-			}
-		})
+		// Make the prompt bounds relative to the context bounds
+		promptBounds.x -= contextBounds.x
+		promptBounds.y -= contextBounds.y
+
+		// Zero the context bounds
+		contextBounds.x = 0
+		contextBounds.y = 0
 
 		return input
 	}
@@ -44,28 +39,24 @@ export class SimpleCoordinates extends TldrawAiTransform {
 	override transformChange = (change: TLAiChange) => {
 		const { offsetIds } = this
 		switch (change.type) {
-			case 'createShape': {
-				const { shape } = change
-				shape.x ??= 0
-				shape.y ??= 0
-				shape.x += this.offset.x
-				shape.y += this.offset.y
-
-				return {
-					...change,
-					shape,
-				}
-			}
+			case 'createShape':
 			case 'updateShape': {
 				const { shape } = change
-				if (offsetIds.has(shape.id)) {
-					if (shape.x) shape.x += this.offset.x
-					if (shape.y) shape.y += this.offset.y
+				// Add back in the offset
+				for (const prop of ['x', 'y'] as const) {
+					if (shape[prop] !== undefined) {
+						shape[prop] += this.bounds[prop]
+					} else {
+						if (offsetIds.has(shape.id)) {
+							shape[prop] = this.before[shape.id + '_' + prop]
+						} else {
+							shape[prop] = this.bounds[prop]
+						}
+					}
 				}
-
 				return {
 					...change,
-					shape,
+					shape: shape as TLShapePartial,
 				}
 			}
 			default: {

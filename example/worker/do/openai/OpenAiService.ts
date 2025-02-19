@@ -87,7 +87,7 @@ export class OpenAiService {
 				const { shapeId } = event
 				const change: TLAiChange = {
 					type: 'updateShape',
-					description: event.intent ?? '',
+					description: shape.note ?? '',
 					shape: {
 						id: shapeId as any,
 						x: event.x,
@@ -102,7 +102,7 @@ export class OpenAiService {
 				const { shapeId } = event
 				const change: TLAiChange = {
 					type: 'updateShape',
-					description: event.intent ?? '',
+					description: shape.note ?? '',
 					shape: {
 						id: shapeId as any,
 						props: {
@@ -118,7 +118,7 @@ export class OpenAiService {
 				const { shapeId } = event
 				const change: TLAiChange = {
 					type: 'deleteShape',
-					description: event.intent ?? '',
+					description: shape.note ?? '',
 					shapeId: shapeId as any,
 				}
 
@@ -141,7 +141,7 @@ const createTextHandler: CreateHandler<ISimpleTextShape> = ({ event, shape }) =>
 	return [
 		{
 			type: 'createShape',
-			description: event.intent ?? '',
+			description: shape.note ?? '',
 			shape: {
 				id: shape.shapeId as any,
 				type: 'text',
@@ -151,9 +151,6 @@ const createTextHandler: CreateHandler<ISimpleTextShape> = ({ event, shape }) =>
 					text: shape.text,
 					color: shape.color ?? 'black',
 					textAlign: shape.textAlign ?? 'middle',
-				},
-				meta: {
-					description: shape.note,
 				},
 			},
 		},
@@ -167,7 +164,7 @@ const createLineHandler: CreateHandler<ISimpleLineShape> = ({ event, shape }) =>
 	return [
 		{
 			type: 'createShape',
-			description: event.intent ?? '',
+			description: shape.note ?? '',
 			shape: {
 				id: shape.shapeId as any,
 				type: 'line',
@@ -203,7 +200,7 @@ const createArrowHandler: CreateHandler<ISimpleArrowShape> = ({ prompt, event, s
 	// Make sure that the shape itself is the first change
 	changes.push({
 		type: 'createShape',
-		description: event.intent ?? '',
+		description: shape.note ?? '',
 		shape: {
 			id: shapeId as any,
 			type: 'arrow',
@@ -225,7 +222,7 @@ const createArrowHandler: CreateHandler<ISimpleArrowShape> = ({ prompt, event, s
 	if (startShape) {
 		changes.push({
 			type: 'createBinding',
-			description: event.intent ?? '',
+			description: shape.note ?? '',
 			binding: {
 				type: 'arrow',
 				fromId: shapeId as any,
@@ -249,7 +246,7 @@ const createArrowHandler: CreateHandler<ISimpleArrowShape> = ({ prompt, event, s
 	if (endShape) {
 		changes.push({
 			type: 'createBinding',
-			description: event.intent ?? '',
+			description: shape.note ?? '',
 			binding: {
 				type: 'arrow',
 				fromId: shapeId as any,
@@ -276,7 +273,7 @@ const createGeoHandler: CreateHandler<ISimpleEllipseShape | ISimpleRectangleShap
 	return [
 		{
 			type: 'createShape',
-			description: event.intent ?? '',
+			description: shape.note ?? '',
 			shape: {
 				id: shape.shapeId as any,
 				type: 'geo',
