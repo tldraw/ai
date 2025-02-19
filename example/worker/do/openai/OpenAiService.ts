@@ -40,6 +40,9 @@ export class OpenAiService {
 	async *stream(prompt: TLAiSerializedPrompt): AsyncGenerator<TLAiChange> {
 		for await (const simpleEvent of streamEvents(this.openai, prompt)) {
 			for (const event of this.simpleEventToTldrawAiChanges(prompt, simpleEvent)) {
+				if (this.env.LOG_LEVEL === 'debug') {
+					console.log(event)
+				}
 				yield event
 			}
 		}

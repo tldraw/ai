@@ -73,7 +73,7 @@ export class TldrawAiDurableObject extends DurableObject<Environment> {
 		const { readable, writable } = new TransformStream()
 		const writer = writable.getWriter()
 
-		let response: TLAiResult = {
+		const response: TLAiResult = {
 			changes: [],
 		}
 
