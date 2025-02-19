@@ -1,11 +1,9 @@
 import { TLAiSerializedPrompt } from '@tldraw/ai'
 import OpenAI from 'openai'
-import { zodResponseFormat } from 'openai/helpers/zod'
 import { buildPromptMessages } from './prompt'
-import { IModelResponse, ISimpleEvent, ModelResponse } from './schema'
+import { IModelResponse, ISimpleEvent, ModelResponse, RESPONSE_FORMAT } from './schema'
 
 const OPENAI_MODEL = 'gpt-4o-2024-08-06'
-const RESPONSE_FORMAT = zodResponseFormat(ModelResponse, 'event')
 
 /**
  * Prompt the OpenAI model with the given prompt. Stream the events as they come back.

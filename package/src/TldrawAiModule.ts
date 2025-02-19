@@ -1,6 +1,6 @@
 import { Box, Editor, FileHelpers, TLShapePartial } from 'tldraw'
 import { TldrawAiTransformConstructor } from './TldrawAiTransform'
-import { TLAiChange, TLAiContent, TLAiMessage, TLAiMessages, TLAiPrompt } from './types'
+import { TLAiChange, TLAiContent, TLAiMessages, TLAiPrompt } from './types'
 import { asMessage, exhaustiveSwitchError } from './utils'
 
 export interface TldrawAiModuleOptions {

@@ -1,3 +1,4 @@
+import { zodResponseFormat } from 'openai/helpers/zod'
 import { z } from 'zod'
 
 const SimpleColor = z.enum([
@@ -16,7 +17,11 @@ const SimpleColor = z.enum([
 	'white',
 ])
 
-const SimpleFill = z.enum(['none', 'solid', 'semi', 'fill', 'pattern'])
+export type ISimpleColor = z.infer<typeof SimpleColor>
+
+const SimpleFill = z.enum(['none', 'tint', 'semi', 'solid', 'pattern'])
+
+export type ISimpleFill = z.infer<typeof SimpleFill>
 
 const SimpleLabel = z.string()
 
@@ -129,7 +134,7 @@ export type ISimpleShape = z.infer<typeof SimpleShape>
 // Events
 
 export const SimpleCreateEvent = z.object({
-	type: z.literal('create'),
+	type: z.enum(['create', 'update']),
 	shape: SimpleShape,
 	intent: z.string(),
 })
@@ -144,15 +149,15 @@ export type ISimpleCreateEvent = z.infer<typeof SimpleCreateEvent>
 
 // export type ISimpleUpdateEvent = z.infer<typeof SimpleUpdateEvent>
 
-export const SimpleMoveEvent = z.object({
-	type: z.literal('move'),
-	shapeId: z.string(),
-	x: z.number(),
-	y: z.number(),
-	intent: z.string(),
-})
+// export const SimpleMoveEvent = z.object({
+// 	type: z.literal('move'),
+// 	shapeId: z.string(),
+// 	x: z.number(),
+// 	y: z.number(),
+// 	intent: z.string(),
+// })
 
-export type ISimpleMoveEvent = z.infer<typeof SimpleMoveEvent>
+// export type ISimpleMoveEvent = z.infer<typeof SimpleMoveEvent>
 
 // const SimpleConnectEvent = z.object({
 // 	type: z.literal('connect'),
@@ -163,36 +168,36 @@ export type ISimpleMoveEvent = z.infer<typeof SimpleMoveEvent>
 // 	intent: z.string(),
 // })
 
-const SimpleLabelEvent = z.object({
-	type: z.literal('label'),
-	shapeId: z.string(),
-	text: z.string(),
-	intent: z.string(),
-})
-export type ISimpleLabelEvent = z.infer<typeof SimpleLabelEvent>
+// const SimpleLabelEvent = z.object({
+// 	type: z.literal('label'),
+// 	shapeId: z.string(),
+// 	text: z.string(),
+// 	intent: z.string(),
+// })
+// export type ISimpleLabelEvent = z.infer<typeof SimpleLabelEvent>
 
 const SimpleDeleteEvent = z.object({
 	type: z.literal('delete'),
 	shapeId: z.string(),
 	intent: z.string(),
 })
-export type ISimpleDeleteEvent = z.infer<typeof SimpleLabelEvent>
+export type ISimpleDeleteEvent = z.infer<typeof SimpleDeleteEvent>
 
 const SimpleThinkEvent = z.object({
 	type: z.literal('think'),
 	text: z.string(),
 	intent: z.string(),
 })
-export type ISimpleThinkEvent = z.infer<typeof SimpleLabelEvent>
+export type ISimpleThinkEvent = z.infer<typeof SimpleThinkEvent>
 
 export const SimpleEvent = z.union([
 	SimpleThinkEvent,
-	SimpleCreateEvent,
-	// SimpleUpdateEvent,
-	SimpleMoveEvent,
-	SimpleLabelEvent,
-	// SimpleConnectEvent,
+	SimpleCreateEvent, // or update
 	SimpleDeleteEvent,
+	// SimpleUpdateEvent,
+	// SimpleMoveEvent,
+	// SimpleLabelEvent,
+	// SimpleConnectEvent,
 ])
 
 export type ISimpleEvent = z.infer<typeof SimpleEvent>
@@ -205,3 +210,5 @@ export const ModelResponse = z.object({
 })
 
 export type IModelResponse = z.infer<typeof ModelResponse>
+
+export const RESPONSE_FORMAT = zodResponseFormat(ModelResponse, 'event')
