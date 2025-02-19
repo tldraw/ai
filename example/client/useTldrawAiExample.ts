@@ -1,10 +1,11 @@
 import { TLAiChange, TLAiResult, TldrawAiOptions, useTldrawAi } from '@tldraw/ai'
+import { Editor } from 'tldraw'
 import { ShapeDescriptions } from './transforms/ShapeDescriptions'
 import { SimpleCoordinates } from './transforms/SimpleCoordinates'
 import { SimpleIds } from './transforms/SimpleIds'
 
-export function useTldrawAiExample() {
-	return useTldrawAi(options)
+export function useTldrawAiExample(editor?: Editor) {
+	return useTldrawAi({ editor, ...options })
 }
 
 // Tip: It's best to define these options outside of any React function. If you do define them inside

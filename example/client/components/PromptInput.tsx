@@ -1,5 +1,5 @@
-import { FormEvent, FormEventHandler, useCallback, useEffect, useState } from 'react'
-import { DefaultSpinner, preventDefault, useEditor } from 'tldraw'
+import { FormEvent, FormEventHandler, useCallback, useState } from 'react'
+import { DefaultSpinner, preventDefault } from 'tldraw'
 import { useTldrawAiExample } from '../useTldrawAiExample'
 
 type PromptInputState =
@@ -11,10 +11,7 @@ type PromptInputState =
 			cancel: (e: FormEvent<HTMLFormElement>) => void
 	  }
 
-export function PromptInput() {
-	const editor = useEditor()
-	const ai = useTldrawAiExample()
-
+export function PromptInput({ ai }: { ai: ReturnType<typeof useTldrawAiExample> }) {
 	// The state of the prompt input, either idle or loading with a cancel callback
 	const [state, setState] = useState<PromptInputState>({ name: 'idle' })
 
@@ -55,11 +52,6 @@ export function PromptInput() {
 
 	// For convenience, we also put the editor and the ai module on
 	// the window object so that we can access it via the console
-	useEffect(() => {
-		if (!editor) return
-		;(window as any).editor = editor
-		;(window as any).ai = ai
-	}, [ai, editor])
 
 	return (
 		<div className="prompt-input">
