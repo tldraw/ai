@@ -43,4 +43,10 @@ body {
 .prompt-input button {
 	width: 64px;
 	height: 36px;
+	background: hsl(214, 84%, 56%);
+	color: hsl(0, 0%, 100%);
+	appearance: none;
+	border: 0;
+	border-radius: 2px;
+	cursor: pointer;
 }

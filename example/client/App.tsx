@@ -69,7 +69,7 @@ function InputBar({ editor }: { editor: Editor }) {
 	return (
 		<div className="prompt-input">
 			<form onSubmit={handleSubmit}>
-				<input name="input" type="text" autoComplete="off" />
+				<input name="input" type="text" autoComplete="off" placeholder="Enter your prompt…" />
 				<button>{isGenerating ? <DefaultSpinner /> : 'Send'}</button>
 			</form>
 		</div>
