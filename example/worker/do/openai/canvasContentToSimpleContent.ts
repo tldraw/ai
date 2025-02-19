@@ -1,5 +1,12 @@
 import { TLAiContent } from '@tldraw/ai'
-import { TLArrowBinding, TLArrowShape, TLGeoShape, TLLineShape, TLTextShape } from 'tldraw'
+import {
+	TLArrowBinding,
+	TLArrowShape,
+	TLGeoShape,
+	TLLineShape,
+	TLNoteShape,
+	TLTextShape,
+} from 'tldraw'
 import { ISimpleShape } from './schema'
 
 export function canvasContentToSimpleContent(content: TLAiContent): {
@@ -75,6 +82,19 @@ export function canvasContentToSimpleContent(content: TLAiContent): {
 						y1: s.props.start.y,
 						x2: s.props.end.x,
 						y2: s.props.end.y,
+						color: s.props.color,
+						text: s.props.text,
+						note: (s.meta?.description as string) ?? '',
+					}
+				}
+
+				if (shape.type === 'note') {
+					const s = shape as TLNoteShape
+					return {
+						shapeId: s.id,
+						type: 'note',
+						x: s.x,
+						y: s.y,
 						color: s.props.color,
 						text: s.props.text,
 						note: (s.meta?.description as string) ?? '',
