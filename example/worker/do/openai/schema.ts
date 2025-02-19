@@ -63,6 +63,18 @@ const SimpleLineShape = z.object({
 
 export type ISimpleLineShape = z.infer<typeof SimpleLineShape>
 
+const SimpleNoteShape = z.object({
+	type: z.literal('note'),
+	shapeId: z.string(),
+	note: z.string(),
+	x: z.number(),
+	y: z.number(),
+	color: SimpleColor.optional(),
+	text: SimpleLabel.optional(),
+})
+
+export type ISimpleNoteShape = z.infer<typeof SimpleNoteShape>
+
 const SimpleTextShape = z.object({
 	type: z.literal('text'),
 	shapeId: z.string(),
@@ -109,6 +121,7 @@ const SimpleShape = z.union([
 	SimpleLineShape,
 	SimpleTextShape,
 	SimpleArrowShape,
+	SimpleNoteShape,
 ])
 
 export type ISimpleShape = z.infer<typeof SimpleShape>

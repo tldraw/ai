@@ -28,7 +28,7 @@ export function PromptInput() {
 
 				// We call the ai module with the value from the input field and get back a promise and a cancel function
 				// The promise will resolve once the generation completes; the cancel function will cancel the generation
-				const { promise, cancel } = ai.prompt({ message: value, stream: true }) // can also be ai.prompt() or ai.repeat() or
+				const { promise, cancel } = ai.prompt({ message: value, stream: false }) // can also be ai.prompt() or ai.repeat() or
 
 				// Set the state to loading and include the cancel function
 				setState({

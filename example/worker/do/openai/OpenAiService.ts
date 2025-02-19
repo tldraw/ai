@@ -2,7 +2,7 @@ import { TLAiChange, TLAiResult, TLAiSerializedPrompt } from '@tldraw/ai'
 import OpenAI from 'openai'
 import { IndexKey, TLArrowBinding, TLArrowShape, TLShapePartial } from 'tldraw'
 import { Environment } from '../../types'
-import { promptAndStreamEvents } from './promptAndStreamEvents'
+import { generateEvents } from './generate'
 import {
 	ISimpleArrowShape,
 	ISimpleCreateEvent,
@@ -13,21 +13,23 @@ import {
 	ISimpleShape,
 	ISimpleTextShape,
 } from './schema'
+import { streamEvents } from './stream'
 
 export class OpenAiService {
 	openai: OpenAI
 
-	constructor(env: Environment) {
+	constructor(public env: Environment) {
 		this.openai = new OpenAI({
 			apiKey: env.OPENAI_API_KEY,
 		})
 	}
 
 	async generate(prompt: TLAiSerializedPrompt): Promise<TLAiResult> {
-		const changes: TLAiChange[] = []
+		const events = await generateEvents(this.openai, prompt)
+		const changes = events.map((event) => this.simpleEventToTldrawAiChanges(prompt, event)).flat()
 
-		for await (const event of promptAndStreamEvents(this.openai, prompt)) {
-			changes.push(...this.handleEvent(prompt, event))
+		if (this.env.LOG_LEVEL === 'debug') {
+			console.log(events)
 		}
 
 		return {
@@ -36,14 +38,14 @@ export class OpenAiService {
 	}
 
 	async *stream(prompt: TLAiSerializedPrompt): AsyncGenerator<TLAiChange> {
-		for await (const simpleEvent of promptAndStreamEvents(this.openai, prompt)) {
-			for (const event of this.handleEvent(prompt, simpleEvent)) {
+		for await (const simpleEvent of streamEvents(this.openai, prompt)) {
+			for (const event of this.simpleEventToTldrawAiChanges(prompt, simpleEvent)) {
 				yield event
 			}
 		}
 	}
 
-	handleEvent(prompt: TLAiSerializedPrompt, event: ISimpleEvent) {
+	simpleEventToTldrawAiChanges(prompt: TLAiSerializedPrompt, event: ISimpleEvent) {
 		const changes: TLAiChange[] = []
 
 		switch (event.type) {
