@@ -30,7 +30,7 @@ const SimpleRectangleShape = z.object({
 	height: z.number(),
 	color: SimpleColor.optional(),
 	fill: SimpleFill.optional(),
-	text: SimpleLabel.optional(),
+	text: SimpleLabel.nullable(),
 })
 
 export type ISimpleRectangleShape = z.infer<typeof SimpleRectangleShape>
@@ -45,7 +45,7 @@ const SimpleEllipseShape = z.object({
 	height: z.number(),
 	color: SimpleColor.optional(),
 	fill: SimpleFill.optional(),
-	text: SimpleLabel.optional(),
+	text: SimpleLabel.nullable(),
 })
 
 export type ISimpleEllipseShape = z.infer<typeof SimpleEllipseShape>
@@ -136,6 +136,14 @@ export const SimpleCreateEvent = z.object({
 
 export type ISimpleCreateEvent = z.infer<typeof SimpleCreateEvent>
 
+export const SimpleUpdateEvent = z.object({
+	type: z.literal('update'),
+	shape: SimpleShape,
+	intent: z.string(),
+})
+
+export type ISimpleUpdateEvent = z.infer<typeof SimpleUpdateEvent>
+
 export const SimpleMoveEvent = z.object({
 	type: z.literal('move'),
 	shapeId: z.string(),
@@ -180,6 +188,7 @@ export type ISimpleThinkEvent = z.infer<typeof SimpleLabelEvent>
 export const SimpleEvent = z.union([
 	SimpleThinkEvent,
 	SimpleCreateEvent,
+	SimpleUpdateEvent,
 	SimpleMoveEvent,
 	SimpleLabelEvent,
 	// SimpleConnectEvent,

@@ -12,6 +12,7 @@ import {
 	ISimpleRectangleShape,
 	ISimpleShape,
 	ISimpleTextShape,
+	ISimpleUpdateEvent,
 } from './schema'
 import { streamEvents } from './stream'
 
@@ -52,6 +53,7 @@ export class OpenAiService {
 		const changes: TLAiChange[] = []
 
 		switch (event.type) {
+			case 'update':
 			case 'create': {
 				const { shape } = event
 				let _changes: TLAiChange[] = []
@@ -132,7 +134,7 @@ export class OpenAiService {
 
 type CreateHandler<T extends ISimpleShape> = (info: {
 	prompt: TLAiSerializedPrompt
-	event: ISimpleCreateEvent
+	event: ISimpleCreateEvent | ISimpleUpdateEvent
 	shape: T
 }) => TLAiChange[]
 

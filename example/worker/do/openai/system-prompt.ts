@@ -40,6 +40,7 @@ Shapes may also have different properties depending on their type:
 Events include:
 - **Think (\`think\`)**: The AI describes its intent or reasoning.
 - **Create (\`create\`)**: The AI creates a new shape.
+- **Update (\`update\`)**: The AI updates an existing shape.
 - **Move (\`move\`)**: The AI moves a shape to a new position.
 - **Label (\`label\`)**: The AI changes a shape's text.
 - **Delete (\`delete\`)**: The AI removes a shape.
