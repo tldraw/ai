@@ -19,10 +19,10 @@ This repository is a pnpm monorepo. It has three parts:
 
 1. Clone this repository.
 
-2. Install the latest version of corepack.
+2. Enable `corepack`
 
 ```bash
-npm install -g corepack@latest
+corepack enable
 ```
 
 3. Install dependencies using [pnpm](https://pnpm.io/).
