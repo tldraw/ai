@@ -48,7 +48,7 @@ function buildDeveloperMessage(prompt: TLAiSerializedPrompt) {
 		developerMessage.content.push({
 			type: 'text',
 			// todo: clean up all the newlines
-			text: `Here are all of the shapes that are in the user's current viewport:\n\n${JSON.stringify(simplifiedCanvasContent).replaceAll('\n', ' ')}`,
+			text: `Here are all of the shapes that are in the user's current viewport:\n\n${JSON.stringify(simplifiedCanvasContent.shapes).replaceAll('\n', ' ')}`,
 		})
 	}
 

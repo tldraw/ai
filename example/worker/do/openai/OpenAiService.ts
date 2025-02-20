@@ -1,14 +1,16 @@
 import { TLAiChange, TLAiResult, TLAiSerializedPrompt } from '@tldraw/ai'
 import OpenAI from 'openai'
+import { TldrawAiBaseService } from '../../TldrawAiBaseService'
 import { Environment } from '../../types'
 import { generateEvents } from './generate'
 import { getTldrawAiChangesFromSimpleEvents } from './getTldrawAiChangesFromSimpleEvents'
 import { streamEvents } from './stream'
 
-export class OpenAiService {
+export class OpenAiService extends TldrawAiBaseService {
 	openai: OpenAI
 
-	constructor(public env: Environment) {
+	constructor(env: Environment) {
+		super(env)
 		this.openai = new OpenAI({
 			apiKey: env.OPENAI_API_KEY,
 		})

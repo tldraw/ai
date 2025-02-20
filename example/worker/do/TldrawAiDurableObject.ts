@@ -1,15 +1,16 @@
 import type { TLAiResult, TLAiSerializedPrompt } from '@tldraw/ai'
 import { DurableObject } from 'cloudflare:workers'
 import { AutoRouter, error } from 'itty-router'
+import { TldrawAiBaseService } from '../TldrawAiBaseService'
 import { Environment } from '../types'
 import { OpenAiService } from './openai/OpenAiService'
 
 export class TldrawAiDurableObject extends DurableObject<Environment> {
-	service: OpenAiService
+	service: TldrawAiBaseService
 
 	constructor(ctx: DurableObjectState, env: Environment) {
 		super(ctx, env)
-		this.service = new OpenAiService(this.env)
+		this.service = new OpenAiService(this.env) // swap this with your own service
 	}
 
 	private readonly router = AutoRouter({
