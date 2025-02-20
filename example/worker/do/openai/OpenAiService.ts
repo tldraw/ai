@@ -16,23 +16,16 @@ export class OpenAiService {
 
 	async generate(prompt: TLAiSerializedPrompt): Promise<TLAiResult> {
 		const events = await generateEvents(this.openai, prompt)
-
-		if (this.env.LOG_LEVEL === 'debug') {
-			console.log(events)
-		}
-
-		return {
-			changes: events.map((event) => getTldrawAiChangesForSimpleEvents(prompt, event)).flat(),
-		}
+		if (this.env.LOG_LEVEL === 'debug') console.log(events)
+		const changes = events.map((event) => getTldrawAiChangesForSimpleEvents(prompt, event)).flat()
+		return { changes }
 	}
 
 	async *stream(prompt: TLAiSerializedPrompt): AsyncGenerator<TLAiChange> {
 		for await (const simpleEvent of streamEvents(this.openai, prompt)) {
-			for (const event of getTldrawAiChangesForSimpleEvents(prompt, simpleEvent)) {
-				if (this.env.LOG_LEVEL === 'debug') {
-					console.log(event)
-				}
-				yield event
+			if (this.env.LOG_LEVEL === 'debug') console.log(simpleEvent)
+			for (const change of getTldrawAiChangesForSimpleEvents(prompt, simpleEvent)) {
+				yield change
 			}
 		}
 	}
