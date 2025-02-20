@@ -5,7 +5,7 @@ import {
 	ChatCompletionDeveloperMessageParam,
 	ChatCompletionUserMessageParam,
 } from 'openai/resources'
-import { getSimpleContentForCanvasContent } from './getSimpleContentForCanvasContent'
+import { getSimpleContentFromCanvasContent } from './getSimpleContentFromCanvasContent'
 import { OPENAI_SYSTEM_PROMPT } from './system-prompt'
 
 /**
@@ -43,7 +43,7 @@ function buildDeveloperMessage(prompt: TLAiSerializedPrompt) {
 	})
 
 	if (prompt.canvasContent) {
-		const simplifiedCanvasContent = getSimpleContentForCanvasContent(prompt.canvasContent)
+		const simplifiedCanvasContent = getSimpleContentFromCanvasContent(prompt.canvasContent)
 
 		developerMessage.content.push({
 			type: 'text',

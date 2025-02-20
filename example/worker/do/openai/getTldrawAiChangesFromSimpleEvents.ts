@@ -9,20 +9,20 @@ import {
 	ISimpleMoveEvent,
 } from './schema'
 
-export function getTldrawAiChangesForSimpleEvents(
+export function getTldrawAiChangesFromSimpleEvents(
 	prompt: TLAiSerializedPrompt,
 	event: ISimpleEvent
 ) {
 	switch (event.type) {
 		case 'update':
 		case 'create': {
-			return getTldrawAiChangesForSimpleCreateEvent(prompt, event)
+			return getTldrawAiChangesFromSimpleCreateEvent(prompt, event)
 		}
 		case 'delete': {
-			return getTldrawAiChangesForSimpleDeleteEvent(prompt, event)
+			return getTldrawAiChangesFromSimpleDeleteEvent(prompt, event)
 		}
 		case 'move': {
-			return getTldrawAiChangesForSimpleMoveEvent(prompt, event)
+			return getTldrawAiChangesFromSimpleMoveEvent(prompt, event)
 		}
 		case 'think': {
 			return []
@@ -45,7 +45,7 @@ function simpleFillToShapeFill(fill: ISimpleFill): TLDefaultFillStyle {
 	return FILL_MAP[fill]
 }
 
-function getTldrawAiChangesForSimpleCreateEvent(
+function getTldrawAiChangesFromSimpleCreateEvent(
 	prompt: TLAiSerializedPrompt,
 	event: ISimpleCreateEvent
 ): TLAiChange[] {
@@ -248,7 +248,7 @@ function getTldrawAiChangesForSimpleCreateEvent(
 	return changes
 }
 
-function getTldrawAiChangesForSimpleDeleteEvent(
+function getTldrawAiChangesFromSimpleDeleteEvent(
 	prompt: TLAiSerializedPrompt,
 	event: ISimpleDeleteEvent
 ): TLAiChange[] {
@@ -263,7 +263,7 @@ function getTldrawAiChangesForSimpleDeleteEvent(
 	]
 }
 
-function getTldrawAiChangesForSimpleMoveEvent(
+function getTldrawAiChangesFromSimpleMoveEvent(
 	prompt: TLAiSerializedPrompt,
 	event: ISimpleMoveEvent
 ): TLAiChange[] {

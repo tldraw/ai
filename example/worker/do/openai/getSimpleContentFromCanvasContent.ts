@@ -10,7 +10,7 @@ import {
 import { shapeFillToSimpleFill } from './conversions'
 import { ISimpleShape } from './schema'
 
-export function getSimpleContentForCanvasContent(content: TLAiContent): {
+export function getSimpleContentFromCanvasContent(content: TLAiContent): {
 	shapes: ISimpleShape[]
 } {
 	return {
