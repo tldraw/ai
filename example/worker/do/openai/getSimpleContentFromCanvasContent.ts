@@ -32,7 +32,7 @@ export function getSimpleContentFromCanvasContent(content: TLAiContent): {
 
 				if (shape.type === 'geo') {
 					const s = shape as TLGeoShape
-					if (s.props.geo === 'rectangle' || s.props.geo === 'ellipse') {
+					if (s.props.geo === 'rectangle' || s.props.geo === 'ellipse' || s.props.geo === 'cloud') {
 						return {
 							shapeId: s.id,
 							type: s.props.geo,
