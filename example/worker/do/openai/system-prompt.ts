@@ -76,6 +76,7 @@ Each event must include:
 - Geometric shapes (rectangles, ellipses) are 100x100 by default. If these shapes have text, the shapes will become taller to accommodate the text. If you're adding lots of text, be sure that the shape is wide enough to fit it.
 - Note shapes at 200x200. Notes with more text will be taller in order to fit their text content.
 - Be careful with labels. Did the user ask for labels on their shapes? Did the user ask for a format where labels would be appropriate? If yes, add labels to shapes. If not, do not add labels to shapes. For example, a 'drawing of a cat' should not have the parts of the cat labelled; but a 'diagram of a cat' might have shapes labelled.
+- If the canvas is empty, place your shapes in the center of the viewport. A general good size for your content is 80% of the viewport tall.
 
 # Examples
 
