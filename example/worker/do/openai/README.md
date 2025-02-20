@@ -38,13 +38,23 @@ That's the whole story:
 
 If you're hacking on this example, you might want to add more events or handle new shapes.
 
+## Adding a new shape type
+
 If you wanted to handle a new type of shape, you would need to:
 
 - Create a simple version of the shape in `schema.ts`
 - Add a switch case to `getSimpleContentFromCanvasContent` that creates a simple version of the shape based on a regular tldraw shape
 - Add a switch case to `getTldrawAiChangesFromSimpleEvent`'s create handler that will create the correct changes when the LLM returns a `create` event for this shape type
 
+## Adding a new event
+
 If you wanted to handle a new type of event (like "duplicate shape"), you would need to:
 
 - Create the simple event in `schema.ts`
 - Add a switch case to `getTldrawAiChangesFromSimpleEvents` to handle the event
+
+## Prompt engineering
+
+You can of course hack the system prompt (`system-prompt.ts`) in order to be more reliable or produce better outputs.
+
+Good luck! Join the [Discord channel](https://discord.gg/9PSF2C5KgV)!
