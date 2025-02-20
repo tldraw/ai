@@ -14,9 +14,11 @@ export function useTldrawAiExample(editor?: Editor) {
 }
 
 const STATIC_TLDRAWAI_OPTIONS: TldrawAiOptions = {
-	// Transforms that will be applied to the prompt before it's sent and to changes as they're received.
+	// Transforms that will be applied to the prompt before it's
+	// sent and to changes as they're received.
 	transforms: [SimpleIds, ShapeDescriptions, SimpleCoordinates],
-	// A function that calls the backend and return generated changes. See worker/do/OpenAiService.ts#generate for the backend part.
+	// A function that calls the backend and return generated changes.
+	// See worker/do/OpenAiService.ts#generate for the backend part.
 	generate: async ({ editor, prompt, signal }) => {
 		const res = await fetch('/generate', {
 			method: 'POST',
@@ -31,7 +33,9 @@ const STATIC_TLDRAWAI_OPTIONS: TldrawAiOptions = {
 
 		return result.changes
 	},
-	// A function similar to `generate` but that will stream changes from the AI as they are ready. See worker/do/OpenAiService.ts#stream for the backend part.
+	// A function similar to `generate` but that will stream changes from
+	// the AI as they are ready. See worker/do/OpenAiService.ts#stream for
+	// the backend part.
 	stream: async function* ({ editor, prompt, signal }) {
 		const res = await fetch('/stream', {
 			method: 'POST',
