@@ -141,40 +141,15 @@ export const SimpleCreateEvent = z.object({
 
 export type ISimpleCreateEvent = z.infer<typeof SimpleCreateEvent>
 
-// export const SimpleUpdateEvent = z.object({
-// 	type: z.literal('update'),
-// 	shape: SimpleShape,
-// 	intent: z.string(),
-// })
+export const SimpleMoveEvent = z.object({
+	type: z.literal('move'),
+	shapeId: z.string(),
+	x: z.number(),
+	y: z.number(),
+	intent: z.string(),
+})
 
-// export type ISimpleUpdateEvent = z.infer<typeof SimpleUpdateEvent>
-
-// export const SimpleMoveEvent = z.object({
-// 	type: z.literal('move'),
-// 	shapeId: z.string(),
-// 	x: z.number(),
-// 	y: z.number(),
-// 	intent: z.string(),
-// })
-
-// export type ISimpleMoveEvent = z.infer<typeof SimpleMoveEvent>
-
-// const SimpleConnectEvent = z.object({
-// 	type: z.literal('connect'),
-// 	method: z.enum(['arrow', 'line']),
-// 	fromId: z.string(),
-// 	toId: z.string(),
-// 	text: z.string(),
-// 	intent: z.string(),
-// })
-
-// const SimpleLabelEvent = z.object({
-// 	type: z.literal('label'),
-// 	shapeId: z.string(),
-// 	text: z.string(),
-// 	intent: z.string(),
-// })
-// export type ISimpleLabelEvent = z.infer<typeof SimpleLabelEvent>
+export type ISimpleMoveEvent = z.infer<typeof SimpleMoveEvent>
 
 const SimpleDeleteEvent = z.object({
 	type: z.literal('delete'),
@@ -194,10 +169,7 @@ export const SimpleEvent = z.union([
 	SimpleThinkEvent,
 	SimpleCreateEvent, // or update
 	SimpleDeleteEvent,
-	// SimpleUpdateEvent,
-	// SimpleMoveEvent,
-	// SimpleLabelEvent,
-	// SimpleConnectEvent,
+	SimpleMoveEvent,
 ])
 
 export type ISimpleEvent = z.infer<typeof SimpleEvent>

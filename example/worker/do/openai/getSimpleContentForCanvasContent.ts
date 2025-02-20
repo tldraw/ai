@@ -7,9 +7,10 @@ import {
 	TLNoteShape,
 	TLTextShape,
 } from 'tldraw'
+import { shapeFillToSimpleFill } from './conversions'
 import { ISimpleShape } from './schema'
 
-export function canvasContentToSimpleContent(content: TLAiContent): {
+export function getSimpleContentForCanvasContent(content: TLAiContent): {
 	shapes: ISimpleShape[]
 } {
 	return {
@@ -40,7 +41,7 @@ export function canvasContentToSimpleContent(content: TLAiContent): {
 							width: s.props.w,
 							height: s.props.h,
 							color: s.props.color,
-							fill: s.props.fill,
+							fill: shapeFillToSimpleFill(s.props.fill),
 							text: s.props.text,
 							note: (s.meta?.description as string) ?? '',
 						}
