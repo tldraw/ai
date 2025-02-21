@@ -55,6 +55,18 @@ pnpm run dev
 
 You can now make any changes you wish to the example project.
 
+You can now make any changes you wish to the example project.
+
+**7. Start hacking**
+
+There are a few things you can do right away:
+
+- Tweak the example's system prompt at `./worker/do/openai/system-prompt.ts`.
+- Make the example's system capable of creating new shapes.
+- Make the example's system capable of creating new events.
+
+See the README in `example/worker/do/openai/README.md` for more information on the example's backend.
+
 > Note: If you find yourself needing to make changes to the package code, please let us know on the [tldraw discord channel](https://discord.gg/9PSF2C5KgV). Your changes would be very useful information as we continue to develop the module!
 
 ## Installation
