@@ -16,7 +16,7 @@ export function getTldrawAiChangesFromSimpleEvents(
 	switch (event.type) {
 		case 'update':
 		case 'create': {
-			return getTldrawAiChangesFromSimpleCreateEvent(prompt, event)
+			return getTldrawAiChangesFromSimpleCreateOrUpdateEvent(prompt, event)
 		}
 		case 'delete': {
 			return getTldrawAiChangesFromSimpleDeleteEvent(prompt, event)
@@ -45,7 +45,7 @@ function simpleFillToShapeFill(fill: ISimpleFill): TLDefaultFillStyle {
 	return FILL_MAP[fill]
 }
 
-function getTldrawAiChangesFromSimpleCreateEvent(
+function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 	prompt: TLAiSerializedPrompt,
 	event: ISimpleCreateEvent
 ): TLAiChange[] {
@@ -56,13 +56,13 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 	switch (shape.type) {
 		case 'text': {
 			changes.push({
-				type: 'createShape',
+				type: event.type === 'create' ? 'createShape' : 'updateShape',
 				description: shape.note ?? '',
 				shape: {
 					id: shape.shapeId as any,
-					type: 'text',
+					type: event.type === 'create' ? 'text' : undefined,
 					x: shape.x,
-					y: shape.y - 12,
+					y: shape.y,
 					props: {
 						text: shape.text,
 						color: shape.color ?? 'black',
@@ -77,11 +77,11 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 			const minY = Math.min(shape.y1, shape.y2)
 
 			changes.push({
-				type: 'createShape',
+				type: event.type === 'create' ? 'createShape' : 'updateShape',
 				description: shape.note ?? '',
 				shape: {
 					id: shape.shapeId as any,
-					type: 'line',
+					type: event.type === 'create' ? 'line' : undefined,
 					x: minX,
 					y: minY,
 					props: {
@@ -110,11 +110,11 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 
 			// Make sure that the shape itself is the first change
 			changes.push({
-				type: 'createShape',
+				type: event.type === 'create' ? 'createShape' : 'updateShape',
 				description: shape.note ?? '',
 				shape: {
 					id: shapeId as any,
-					type: 'arrow',
+					type: event.type === 'create' ? 'arrow' : undefined,
 					x: 0,
 					y: 0,
 					props: {
@@ -174,15 +174,16 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 				})
 			}
 			break
-		}
+        }
+        case 'cloud':
 		case 'rectangle':
 		case 'ellipse': {
 			changes.push({
-				type: 'createShape',
+				type: event.type === 'create' ? 'createShape' : 'updateShape',
 				description: shape.note ?? '',
 				shape: {
 					id: shape.shapeId as any,
-					type: 'geo',
+					type: event.type === 'create' ? 'geo' : undefined,
 					x: shape.x,
 					y: shape.y,
 					props: {
@@ -200,15 +201,14 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 
 		case 'note': {
 			changes.push({
-				type: 'createShape',
+				type: event.type === 'create' ? 'createShape' : 'updateShape',
 				description: shape.note ?? '',
 				shape: {
 					id: shape.shapeId as any,
-					type: 'note',
+					type: event.type === 'create' ? 'note' : undefined,
 					x: shape.x,
 					y: shape.y,
 					props: {
-						geo: shape.type,
 						color: shape.color ?? 'black',
 						text: shape.text ?? '',
 					},
@@ -224,7 +224,7 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 			if (!originalShape) break
 
 			changes.push({
-				type: 'createShape',
+				type: event.type === 'create' ? 'createShape' : 'updateShape',
 				description: shape.note ?? '',
 				shape: originalShape,
 			})
@@ -241,9 +241,6 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 			prompt.canvasContent.bindings?.push(change.binding as any)
 		}
 	}
-
-	// Now we can add the changes to the final list
-	changes.push(...changes)
 
 	return changes
 }
