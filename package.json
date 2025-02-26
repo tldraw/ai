@@ -12,7 +12,8 @@
 	"scripts": {
 		"types": "tsc -b tsconfig.json",
 		"types:watch": "tsc -b tsconfig.json --watch",
-		"dev": "pnpm --filter ./example dev"
+		"dev": "pnpm --filter ./example dev",
+		"test": "pnpm --filter ./package test"
 	},
 	"devDependencies": {
 		"@types/node": "^22.10.5",

@@ -9,18 +9,23 @@
 	},
 	"scripts": {
 		"prepack": "./scripts/prepack.sh",
-		"postpack": "./scripts/postpack.sh"
+		"postpack": "./scripts/postpack.sh",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"type": "module",
 	"main": "./src/index.ts",
 	"devDependencies": {
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
+		"@vitest/ui": "^1.4.0",
 		"esbuild": "^0.25.0",
+		"happy-dom": "^14.0.0",
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"tldraw": "catalog:",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vitest": "^1.4.0"
 	},
 	"peerDependencies": {
 		"react": "catalog:",
