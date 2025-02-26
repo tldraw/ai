@@ -18,14 +18,14 @@
 	"devDependencies": {
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
-		"@vitest/ui": "^1.4.0",
+		"@vitest/ui": "^3.0.7",
 		"esbuild": "^0.25.0",
-		"happy-dom": "^14.0.0",
+		"happy-dom": "^17.1.8",
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"tldraw": "catalog:",
 		"typescript": "catalog:",
-		"vitest": "^1.4.0"
+		"vitest": "^3.0.7"
 	},
 	"peerDependencies": {
 		"react": "catalog:",
