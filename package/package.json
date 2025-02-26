@@ -8,7 +8,7 @@
 		"email": "hello@tldraw.com"
 	},
 	"scripts": {
-		"prepack": "./scripts/prepack.sh",
+		"prepack": "tsx ./scripts/prepack.ts",
 		"postpack": "./scripts/postpack.sh",
 		"test": "vitest run",
 		"test:watch": "vitest"
@@ -16,14 +16,19 @@
 	"type": "module",
 	"main": "./src/index.ts",
 	"devDependencies": {
+		"@babel/parser": "^7.26.9",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
 		"@vitest/ui": "^3.0.7",
 		"esbuild": "^0.25.0",
+		"execa": "^9.5.2",
+		"glob": "^11.0.1",
 		"happy-dom": "^17.1.8",
 		"react": "catalog:",
 		"react-dom": "catalog:",
+		"recast": "^0.23.10",
 		"tldraw": "catalog:",
+		"tsx": "^4.19.3",
 		"typescript": "catalog:",
 		"vitest": "^3.0.7"
 	},
