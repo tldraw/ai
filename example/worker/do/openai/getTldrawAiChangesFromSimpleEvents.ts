@@ -1,6 +1,21 @@
-import { TLAiChange, TLAiSerializedPrompt } from '@tldraw/ai'
+import {
+	TLAiChange,
+	TLAiCreateBindingChange,
+	TLAiCreateShapeChange,
+	TLAiSerializedPrompt,
+	TLAiUpdateShapeChange,
+} from '@tldraw/ai'
 import { exhaustiveSwitchError } from '@tldraw/ai/src/utils'
-import { IndexKey, TLArrowBinding, TLArrowShape, TLDefaultFillStyle, TLShapePartial } from 'tldraw'
+import {
+	IndexKey,
+	TLArrowBinding,
+	TLArrowShape,
+	TLDefaultFillStyle,
+	TLGeoShape,
+	TLLineShape,
+	TLNoteShape,
+	TLTextShape,
+} from 'tldraw'
 import {
 	ISimpleCreateEvent,
 	ISimpleDeleteEvent,
@@ -16,7 +31,7 @@ export function getTldrawAiChangesFromSimpleEvents(
 	switch (event.type) {
 		case 'update':
 		case 'create': {
-			return getTldrawAiChangesFromSimpleCreateEvent(prompt, event)
+			return getTldrawAiChangesFromSimpleCreateOrUpdateEvent(prompt, event)
 		}
 		case 'delete': {
 			return getTldrawAiChangesFromSimpleDeleteEvent(prompt, event)
@@ -45,7 +60,7 @@ function simpleFillToShapeFill(fill: ISimpleFill): TLDefaultFillStyle {
 	return FILL_MAP[fill]
 }
 
-function getTldrawAiChangesFromSimpleCreateEvent(
+function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 	prompt: TLAiSerializedPrompt,
 	event: ISimpleCreateEvent
 ): TLAiChange[] {
@@ -53,23 +68,25 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 
 	const changes: TLAiChange[] = []
 
+	const shapeEventType = event.type === 'create' ? 'createShape' : 'updateShape'
+
 	switch (shape.type) {
 		case 'text': {
 			changes.push({
-				type: 'createShape',
+				type: shapeEventType,
 				description: shape.note ?? '',
 				shape: {
 					id: shape.shapeId as any,
 					type: 'text',
 					x: shape.x,
-					y: shape.y - 12,
+					y: shape.y,
 					props: {
 						text: shape.text,
 						color: shape.color ?? 'black',
 						textAlign: shape.textAlign ?? 'middle',
 					},
 				},
-			})
+			} satisfies TLAiCreateShapeChange<TLTextShape> | TLAiUpdateShapeChange<TLTextShape>)
 			break
 		}
 		case 'line': {
@@ -77,7 +94,7 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 			const minY = Math.min(shape.y1, shape.y2)
 
 			changes.push({
-				type: 'createShape',
+				type: shapeEventType,
 				description: shape.note ?? '',
 				shape: {
 					id: shape.shapeId as any,
@@ -102,7 +119,7 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 						color: shape.color ?? 'black',
 					},
 				},
-			})
+			} satisfies TLAiCreateShapeChange<TLLineShape> | TLAiUpdateShapeChange<TLLineShape>)
 			break
 		}
 		case 'arrow': {
@@ -110,7 +127,7 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 
 			// Make sure that the shape itself is the first change
 			changes.push({
-				type: 'createShape',
+				type: shapeEventType,
 				description: shape.note ?? '',
 				shape: {
 					id: shapeId as any,
@@ -123,11 +140,21 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 						start: { x: x1, y: y1 },
 						end: { x: x2, y: y2 },
 					},
-				} satisfies TLShapePartial<TLArrowShape>,
-			})
+				},
+			} satisfies TLAiCreateShapeChange<TLArrowShape> | TLAiUpdateShapeChange<TLArrowShape>)
+
+			if (shapeEventType === 'updateShape') {
+				// Updating bindings is complicated, it's easier to just delete all bindings and recreate them
+				for (const binding of prompt.canvasContent.bindings.filter((b) => b.fromId === 'shapeId')) {
+					changes.push({
+						type: 'deleteBinding',
+						description: 'cleaning up old bindings',
+						bindingId: binding.id as any,
+					})
+				}
+			}
 
 			// Does the arrow have a start shape? Then try to create the binding
-
 			const startShape = fromId ? prompt.canvasContent.shapes.find((s) => s.id === fromId) : null
 
 			if (startShape) {
@@ -145,9 +172,8 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 							terminal: 'start',
 						},
 						meta: {},
-						typeName: 'binding',
-					} satisfies Omit<TLArrowBinding, 'id'>,
-				})
+					},
+				} satisfies TLAiCreateBindingChange<TLArrowBinding>)
 			}
 
 			// Does the arrow have an end shape? Then try to create the binding
@@ -169,16 +195,16 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 							terminal: 'end',
 						},
 						meta: {},
-						typeName: 'binding',
-					} satisfies Omit<TLArrowBinding, 'id'>,
-				})
+					},
+				} satisfies TLAiCreateBindingChange<TLArrowBinding>)
 			}
 			break
 		}
+		case 'cloud':
 		case 'rectangle':
 		case 'ellipse': {
 			changes.push({
-				type: 'createShape',
+				type: shapeEventType,
 				description: shape.note ?? '',
 				shape: {
 					id: shape.shapeId as any,
@@ -194,13 +220,13 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 						text: shape.text ?? '',
 					},
 				},
-			})
+			} satisfies TLAiCreateShapeChange<TLGeoShape> | TLAiUpdateShapeChange<TLGeoShape>)
 			break
 		}
 
 		case 'note': {
 			changes.push({
-				type: 'createShape',
+				type: shapeEventType,
 				description: shape.note ?? '',
 				shape: {
 					id: shape.shapeId as any,
@@ -208,12 +234,11 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 					x: shape.x,
 					y: shape.y,
 					props: {
-						geo: shape.type,
 						color: shape.color ?? 'black',
 						text: shape.text ?? '',
 					},
 				},
-			})
+			} satisfies TLAiCreateShapeChange<TLNoteShape> | TLAiUpdateShapeChange<TLNoteShape>)
 			break
 		}
 
@@ -224,7 +249,7 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 			if (!originalShape) break
 
 			changes.push({
-				type: 'createShape',
+				type: shapeEventType,
 				description: shape.note ?? '',
 				shape: originalShape,
 			})
@@ -241,9 +266,6 @@ function getTldrawAiChangesFromSimpleCreateEvent(
 			prompt.canvasContent.bindings?.push(change.binding as any)
 		}
 	}
-
-	// Now we can add the changes to the final list
-	changes.push(...changes)
 
 	return changes
 }
