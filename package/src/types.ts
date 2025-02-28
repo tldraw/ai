@@ -6,6 +6,7 @@ import type {
 	TLBindingId,
 	TLBindingUpdate,
 	TLContent,
+	TLShape,
 	TLShapeId,
 	TLShapePartial,
 } from 'tldraw'
@@ -53,16 +54,16 @@ export interface TLAiSerializedPrompt extends Omit<TLAiPrompt, 'contextBounds' |
 	promptBounds: BoxModel
 }
 
-export interface CreateShapeChange {
+export interface CreateShapeChange<T extends TLShape = TLShape> {
 	type: 'createShape'
 	description: string
-	shape: TLShapePartial
+	shape: TLShapePartial<T>
 }
 
-export interface UpdateShapeChange {
+export interface UpdateShapeChange<T extends TLShape = TLShape> {
 	type: 'updateShape'
 	description: string
-	shape: Omit<TLShapePartial, 'type'>
+	shape: Omit<TLShapePartial<T>, 'type'> & { type?: T['type'] } // type is optional
 }
 
 export interface DeleteShapeChange {

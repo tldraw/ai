@@ -60,7 +60,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 				description: shape.note ?? '',
 				shape: {
 					id: shape.shapeId as any,
-					type: event.type === 'create' ? 'text' : undefined,
+					type: 'text',
 					x: shape.x,
 					y: shape.y,
 					props: {
@@ -69,7 +69,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 						textAlign: shape.textAlign ?? 'middle',
 					},
 				},
-			})
+			} satisfies TLAiChange)
 			break
 		}
 		case 'line': {
@@ -81,7 +81,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 				description: shape.note ?? '',
 				shape: {
 					id: shape.shapeId as any,
-					type: event.type === 'create' ? 'line' : undefined,
+					type: 'text',
 					x: minX,
 					y: minY,
 					props: {
@@ -114,7 +114,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 				description: shape.note ?? '',
 				shape: {
 					id: shapeId as any,
-					type: event.type === 'create' ? 'arrow' : undefined,
+					type: 'arrow',
 					x: 0,
 					y: 0,
 					props: {
@@ -174,8 +174,8 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 				})
 			}
 			break
-        }
-        case 'cloud':
+		}
+		case 'cloud':
 		case 'rectangle':
 		case 'ellipse': {
 			changes.push({
@@ -183,7 +183,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 				description: shape.note ?? '',
 				shape: {
 					id: shape.shapeId as any,
-					type: event.type === 'create' ? 'geo' : undefined,
+					type: 'geo',
 					x: shape.x,
 					y: shape.y,
 					props: {
@@ -205,7 +205,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 				description: shape.note ?? '',
 				shape: {
 					id: shape.shapeId as any,
-					type: event.type === 'create' ? 'note' : undefined,
+					type: 'note',
 					x: shape.x,
 					y: shape.y,
 					props: {
