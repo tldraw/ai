@@ -69,7 +69,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 						textAlign: shape.textAlign ?? 'middle',
 					},
 				},
-			} satisfies TLAiChange)
+			})
 			break
 		}
 		case 'line': {
