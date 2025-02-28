@@ -54,37 +54,37 @@ export interface TLAiSerializedPrompt extends Omit<TLAiPrompt, 'contextBounds' |
 	promptBounds: BoxModel
 }
 
-export interface CreateShapeChange<T extends TLShape = TLShape> {
+export interface TLAiCreateShapeChange<T extends TLShape = TLShape> {
 	type: 'createShape'
 	description: string
 	shape: TLShapePartial<T>
 }
 
-export interface UpdateShapeChange<T extends TLShape = TLShape> {
+export interface TLAiUpdateShapeChange<T extends TLShape = TLShape> {
 	type: 'updateShape'
 	description: string
 	shape: Omit<TLShapePartial<T>, 'type'> & { type?: T['type'] } // type is optional
 }
 
-export interface DeleteShapeChange {
+export interface TLAiDeleteShapeChange {
 	type: 'deleteShape'
 	description: string
 	shapeId: TLShapeId
 }
 
-export interface CreateBindingChange {
+export interface TLAiCreateBindingChange<B extends TLBinding = TLBinding> {
 	type: 'createBinding'
 	description: string
-	binding: TLBindingCreate
+	binding: TLBindingCreate<B>
 }
 
-export interface UpdateBindingChange {
+export interface TLAiUpdateBindingChange<B extends TLBinding = TLBinding> {
 	type: 'updateBinding'
 	description: string
-	binding: TLBindingUpdate
+	binding: TLBindingUpdate<B>
 }
 
-export interface DeleteBindingChange {
+export interface TLAiDeleteBindingChange {
 	type: 'deleteBinding'
 	description: string
 	bindingId: TLBindingId
@@ -94,12 +94,12 @@ export interface DeleteBindingChange {
  * A generated change that can be applied to the editor.
  */
 export type TLAiChange =
-	| CreateShapeChange
-	| UpdateShapeChange
-	| DeleteShapeChange
-	| CreateBindingChange
-	| UpdateBindingChange
-	| DeleteBindingChange
+	| TLAiCreateShapeChange
+	| TLAiUpdateShapeChange
+	| TLAiDeleteShapeChange
+	| TLAiCreateBindingChange
+	| TLAiUpdateBindingChange
+	| TLAiDeleteBindingChange
 
 export type TLAiContent = Omit<TLContent, 'schema' | 'rootShapeIds'> & {
 	bindings: TLBinding[]
