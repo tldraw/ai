@@ -34,7 +34,7 @@ async function main() {
 	packageJson.main = 'dist/cjs/index.js'
 	packageJson.module = 'dist/esm/index.mjs'
 	packageJson.source = 'src/index.ts'
-	packageJson.types = 'dist/types/index.d.ts'
+	packageJson.types = 'dist/types/src/index.d.ts'
 	packageJson.files = ['dist', 'src', 'README.md']
 	packageJson.exports = {
 		'.': {
