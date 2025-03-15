@@ -15,6 +15,7 @@ import {
 	TLLineShape,
 	TLNoteShape,
 	TLTextShape,
+	toRichText,
 } from 'tldraw'
 import {
 	ISimpleCreateEvent,
@@ -81,7 +82,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 					x: shape.x,
 					y: shape.y,
 					props: {
-						richText: shape.text ?? '',
+						richText: toRichText(shape.text ?? ''),
 						color: shape.color ?? 'black',
 						textAlign: shape.textAlign ?? 'middle',
 					},
@@ -217,7 +218,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 						h: shape.height,
 						color: shape.color ?? 'black',
 						fill: simpleFillToShapeFill(shape.fill ?? 'none'),
-						text: shape.text ?? '',
+						richText: toRichText(shape.text ?? ''),
 					},
 				},
 			} satisfies TLAiCreateShapeChange<TLGeoShape> | TLAiUpdateShapeChange<TLGeoShape>)
@@ -235,7 +236,7 @@ function getTldrawAiChangesFromSimpleCreateOrUpdateEvent(
 					y: shape.y,
 					props: {
 						color: shape.color ?? 'black',
-						text: shape.text ?? '',
+						richText: toRichText(shape.text ?? ''),
 					},
 				},
 			} satisfies TLAiCreateShapeChange<TLNoteShape> | TLAiUpdateShapeChange<TLNoteShape>)
