@@ -10,3 +10,4 @@ export {
 	type TldrawAiPromptOptions,
 	type TldrawAiStreamFn,
 } from './useTldrawAi'
+export { asMessage } from './utils'
