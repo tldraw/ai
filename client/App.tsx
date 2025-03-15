@@ -6,7 +6,7 @@ function App() {
 	const [editor, setEditor] = useState<Editor | null>(null) // [1]
 	return (
 		<div className="tldraw-ai-container">
-			<Tldraw persistenceKey="tldraw-ai-demo" onMount={setEditor} />
+			<Tldraw persistenceKey="tldraw-ai-demo-2" onMount={setEditor} />
 			{editor && <InputBar editor={editor} />}
 		</div>
 	)

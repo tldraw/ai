@@ -1,5 +1,4 @@
 import { TLAiSerializedPrompt } from '@tldraw/ai'
-import { asMessage } from '@tldraw/ai/src/utils'
 import {
 	ChatCompletionContentPart,
 	ChatCompletionDeveloperMessageParam,
@@ -7,6 +6,7 @@ import {
 } from 'openai/resources'
 import { getSimpleContentFromCanvasContent } from './getSimpleContentFromCanvasContent'
 import { OPENAI_SYSTEM_PROMPT } from './system-prompt'
+import { asMessage } from '@tldraw/ai'
 
 /**
  * Build the messages for the prompt.

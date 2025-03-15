@@ -1,4 +1,9 @@
 {
 	"extends": "./tsconfig.base.json",
-	"references": [{ "path": "./package/tsconfig.json" }, { "path": "./example/tsconfig.json" }]
+	"compilerOptions": {
+		"outDir": "./.tsbuild",
+		"types": ["@cloudflare/workers-types"]
+	},
+	"include": ["client", "shared", "worker"],
+	"files": ["./vite.config.ts"]
 }

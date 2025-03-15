@@ -21,7 +21,7 @@ export function getSimpleContentFromCanvasContent(content: TLAiContent): {
 					return {
 						shapeId: s.id,
 						type: 'text',
-						text: s.props.text,
+						text: s.props.richText,
 						x: s.x,
 						y: s.y,
 						color: s.props.color,
@@ -42,7 +42,7 @@ export function getSimpleContentFromCanvasContent(content: TLAiContent): {
 							height: s.props.h,
 							color: s.props.color,
 							fill: shapeFillToSimpleFill(s.props.fill),
-							text: s.props.text,
+							text: s.props.richText,
 							note: (s.meta?.description as string) ?? '',
 						}
 					}
@@ -97,7 +97,7 @@ export function getSimpleContentFromCanvasContent(content: TLAiContent): {
 						x: s.x,
 						y: s.y,
 						color: s.props.color,
-						text: s.props.text,
+						text: s.props.richText,
 						note: (s.meta?.description as string) ?? '',
 					}
 				}
